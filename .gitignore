@@ -1,3 +1,6 @@
+# 私的追加データ
+private/
+
 .DS_Store
 node_modules/
 /dist/
@@ -15,3 +18,7 @@ selenium-debug.log
 *.ntvs*
 *.njsproj
 *.sln
+*.editorconfig
+
+# 環境依存系
+/.env
