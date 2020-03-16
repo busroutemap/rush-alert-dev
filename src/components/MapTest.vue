@@ -1,17 +1,33 @@
 <template>
-    <l-map ref="map" id="mapcontainer" v-bind:zoom="zoom" v-bind:center="center">
-        <l-tile-layer v-bind:url="url">
-            <l-marker v-bind:lat-lng="center">
-                <l-popup>{{text}}</l-popup>
-            </l-marker>
-        </l-tile-layer>
+    <l-map 
+    ref="map"
+    id="mapcontainer"
+    v-bind:zoom="zoom"
+    v-bind:center="center"
+    >
+        <l-tile-layer 
+        v-bind:url="url"
+        v-bind:attribution="attribution"/>
+        <l-marker v-bind:lat-lng="marker01">
+            <l-popup>
+                <p>{{text}}</p>
+            </l-popup>
+        </l-marker>
     </l-map>
 </template>
 
 <script>
 import L from 'leaflet';
-import { LMap, LTileLayer, LMarker} from 'vue2-leaflet';
-import { Icon } from 'leaflet';
+import { 
+    LMap,
+    LTileLayer,
+    LMarker,
+    LPopup
+    } from 'vue2-leaflet';
+import { 
+    latLng,
+    Icon 
+    } from 'leaflet';
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -25,7 +41,8 @@ export default {
     components:{ 
         LMap,
         LTileLayer,
-        LMarker
+        LMarker,
+        LPopup
     },
     mounted() {
         // this.$nextTick(() => {
@@ -36,8 +53,10 @@ export default {
         return{
             text:"hello",
             url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
+            attribution:"",
             zoom: 11,
-            center: [35.678367, 139.763465]
+            center: [35.678367, 139.763465],
+            marker01: latLng(35.678367, 139.763465)
         }
     }
 };
