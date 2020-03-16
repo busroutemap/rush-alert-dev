@@ -1,13 +1,18 @@
 <template>
-  <div id="app">
+  <div id="app" class="">
     <nav>
-      <div id="menu" class="pm0">
-        <h1 id="title" class="m10">かけこみアラート</h1>
-        <h1 id="m1" class="m10"><a href="/map" class="a">マップモード</a></h1>
-        <h1 id="m2" class="m10"><a href="/detail" class="a">詳細モード</a></h1>
+      <div id="menu" class="p0 m0">
+        <h1 id="title" class="item min3x">かけこみアラート</h1>
+        <h1 id="m1" class="item min2x"><a href="/map" class="a">マップモード</a></h1>
+        <h1 id="m2" class="item min2x"><a href="/detail" class="a">詳細モード</a></h1>
       </div>
     </nav>
-    <router-view/>
+    <router-view class=""/>
+    <footer>
+      <div id="footer" class="">
+        <h2>終わり</h2>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -20,19 +25,33 @@ export default {
 <style scoped>
 h1{
   color:white;
-  font-size:20px;
+  font-size:2.5vh;
 }
 .a{
   color:white;
   text-decoration: none;
-  font-size:15px;
+  font-size:2vh;
 }
-.pm0{
+.p0{
   padding:0px;
+}
+.m0{
   margin:0px;
 }
-.m10{
-  margin:10px;
+.item{
+  margin-top:1vh;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 0.5vh;
+  padding:0.5vh;
+}
+.min2x{
+  min-width:100px;
+  max-width: 25vw;
+}
+.min3x{
+  min-width:150px;
+  max-width: 50vw;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -45,22 +64,19 @@ h1{
 #menu {
   display:grid;
   background-color: darkslategray;
-  grid-template-areas: "title m1 m2";
   /* grid-template-rows: 1fr 1fr; */
-  grid-template-columns: 25% 10% 10%;
+  grid-template-columns: 5fr 2fr 2fr;
+  height:6vh;
 }
 #title{
-  grid-area:"title";
-  border-right: white solid 2px;
+  border: none;
 }
 #m1{
-  grid-area: "m1";
   /* background-color: aliceblue; */
-  border-right: white solid 2px;
+  border-left: white solid 2px;
 }
 #m2{
-  grid-area: "m2";
   /* background-color: aliceblue; */
-  border-right: white solid 2px;
+  border-left: white solid 2px;
 }
 </style>
