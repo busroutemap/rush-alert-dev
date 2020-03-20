@@ -28,8 +28,11 @@ export default new Router({
     //   component: MapApp
     // },
     {
-      path: '/map/',
-      name: 'MapTest',
+      path: `/map/:z/:lat/:lon/`,
+      component: MapTest,
+    },
+    {
+      path: `/map/`,
       component: MapTest,
     }
   ]

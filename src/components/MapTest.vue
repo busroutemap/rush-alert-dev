@@ -4,6 +4,8 @@
     id="mapcontainer"
     v-bind:zoom="zoom"
     v-bind:center="center"
+    @update:zoom="zoomUpdate"
+    @update:center="centerUpdate"
     >
         <l-tile-layer 
         v-bind:url="url"
@@ -44,7 +46,51 @@ export default {
         LMarker,
         LPopup
     },
+    computed:{
+    },
+    watch: {
+    },
+    methods:{
+        zoomUpdate(zoom) {
+            this.zoom = zoom;
+            const z = this.zoom;
+            const lat = this.center.lat;
+            const lon = this.center.lng;
+            this.$router.push({
+                path:`/map/${z}/${lat}/${lon}`,
+            });
+        },
+        centerUpdate(center) {
+            this.center = center;
+            const z = this.zoom;
+            const lat = this.center.lat;
+            const lon = this.center.lng;
+            this.$router.push({
+                path:`/map/${z}/${lat}/${lon}`,
+            });
+        }
+    },
     async mounted() {
+        // 引数があればそれに従いzoom,centerを変更
+        // 無ければ既定のものへと強引に値を変更
+        if(this.$route.params.z){
+            this.zoom = this.$route.params.z;
+        } else{
+            this.zoom = this.home[0];
+        }
+        if(this.$route.params.lat){
+            this.center.lat = this.$route.params.lat;
+        } else{
+            this.center.lat = this.home[1].lat;
+        }
+        if(this.$route.params.lon){
+            this.center.lng = this.$route.params.lon;
+        } else{
+            this.center.lng = this.home[1].lng;
+        }
+        // this.$router.push({
+        //     path:`/map/${this.zoom}/${this.center.lat}/${this.center.lng}`,
+        // });
         // this.$nextTick(() => {
         //     // this.$refs.myMap.mapObject.setView(this.center);
         // });
@@ -79,8 +125,11 @@ export default {
             text:"hello",
             url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
             attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
-            zoom: 11,
-            center: [35.678367, 139.763465],
+            // このzoomとcenterの値はバグ回避で、実際の初期値はhome
+            // URLで指定がなければhomeの値を利用する
+            zoom: 10,
+            center: latLng(35,135),
+            home: [11, latLng(36, 140)],
             marker01: latLng(35.678367, 139.763465)
         }
     }
