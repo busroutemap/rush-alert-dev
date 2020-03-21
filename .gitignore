@@ -21,4 +21,4 @@ selenium-debug.log
 *.editorconfig
 
 # 環境依存系
-/.env
+.env
