@@ -12,7 +12,7 @@
         v-bind:attribution="attribution"/>
         <l-marker
         v-bind:lat-lng="marker01"
-        v-bind:key="m">
+        >
             <l-popup>
                 <p>{{text}}</p>
             </l-popup>
