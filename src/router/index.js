@@ -1,14 +1,26 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import NotFound from '../components/NotFound'
+import MapTest from '../components/MapTest'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
-    component: Home
+    path:'*',
+    name:'NotFound',
+    component:NotFound
+  },
+  // {
+  //   path: '/',
+  //   name: 'Home',
+  //   component: Home
+  // },
+  {
+    path:'/map',
+    name:'MapTest',
+    component:MapTest
   },
   {
     path: '/about',

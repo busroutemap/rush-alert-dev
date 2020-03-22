@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <headNav/>
     <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
@@ -8,9 +9,13 @@
   </div>
 </template>
 <script>
+import headNav from './components/Nav'
 export default {
   mounted(){
-    console.log(process.env.VUE_APP_TOKEN);
+    console.log(process.env.VUE_APP_ODPT_TOKEN);
+  },
+  components:{
+    headNav
   }
 }
 </script>
