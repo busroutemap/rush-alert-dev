@@ -10,7 +10,9 @@
         <l-tile-layer 
         v-bind:url="url"
         v-bind:attribution="attribution"/>
-        <l-marker v-bind:lat-lng="marker01">
+        <l-marker
+        v-bind:lat-lng="marker01"
+        >
             <l-popup>
                 <p>{{text}}</p>
             </l-popup>
@@ -68,6 +70,9 @@ export default {
             this.$router.push({
                 path:`/map/${z}/${lat}/${lon}`,
             });
+        },
+        apiMarker01() {
+            
         }
     },
     async mounted() {
@@ -96,7 +101,8 @@ export default {
         // });
         // ひとまずgithubにある自分のjsonで
         const loadjson = (addURL)=>{
-            const baseURL = "https://busroutemap.github.io/ttrmap/";
+            // const baseURL = "https://busroutemap.github.io/ttrmap/";
+            const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
             return fetch(baseURL+addURL)
             .then(response=> {
                 if (response.ok){
@@ -111,13 +117,22 @@ export default {
             });
         };
         let pAll = [];
-        pAll.push(loadjson("stopinfo/data_11.json"));
+        // pAll.push(loadjson("stopinfo/data_11.json"));
+        // ひとまずエリア内のバス停を探す
+        console.log(process.env.VUE_APP_odpt_token);
+        const lk = process.env.VUE_APP_odpt_token;
+        pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${lk}`));
+        // ここにAPIを継ぎ足していく
+        // then内のthis変更回避でthatを指定
+        const that = this;
         this.text = await Promise.all(pAll)
         .catch(e=>{
             console.log(e);
         })
         .then(r=>{
-            return r[0][0]["バス停名"];
+            // console.log(r);
+            return r;
+            // return r[0][0]["バス停名"];
         });
     },
     data(){
@@ -130,7 +145,10 @@ export default {
             zoom: 10,
             center: latLng(35,135),
             home: [11, latLng(36, 140)],
-            marker01: latLng(35.678367, 139.763465)
+            marker01: latLng(35.678367, 139.763465),
+            // 半径300mを検索範囲内とする
+            radius:300,
+            myKey:"",
         }
     }
 };
