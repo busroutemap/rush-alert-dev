@@ -2,14 +2,20 @@
 private/
 
 .DS_Store
-node_modules/
-/dist/
+node_modules
+/dist
+
+#env
+.env
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/test/unit/coverage/
-/test/e2e/reports/
-selenium-debug.log
 
 # Editor directories and files
 .idea
@@ -18,7 +24,4 @@ selenium-debug.log
 *.ntvs*
 *.njsproj
 *.sln
-*.editorconfig
-
-# 環境依存系
-.env
+*.sw?
