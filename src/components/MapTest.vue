@@ -119,8 +119,8 @@ export default {
         let pAll = [];
         // pAll.push(loadjson("stopinfo/data_11.json"));
         // ひとまずエリア内のバス停を探す
-        console.log(process.env.VUE_APP_odpt_token);
-        const lk = process.env.VUE_APP_odpt_token;
+        console.log(process.env.VUE_APP_ODPT_TOKEN);
+        const lk = process.env.VUE_APP_ODPT_TOKEN;
         pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${lk}`));
         // ここにAPIを継ぎ足していく
         // then内のthis変更回避でthatを指定
