@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import NotFound from '../components/NotFound'
 import MapTest from '../components/MapTest'
+import 'leaflet/dist/leaflet.css'
 
 Vue.use(VueRouter)
 
