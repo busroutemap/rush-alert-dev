@@ -55,53 +55,22 @@ export default {
     methods:{
         zoomUpdate(zoom) {
             this.zoom = zoom;
-            const z = this.zoom;
-            const lat = this.center.lat;
-            const lon = this.center.lng;
-            this.$router.push({
-                path:`/map/${z}/${lat}/${lon}`,
-            });
         },
         centerUpdate(center) {
             this.center = center;
-            const z = this.zoom;
-            const lat = this.center.lat;
-            const lon = this.center.lng;
-            this.$router.push({
-                path:`/map/${z}/${lat}/${lon}`,
-            });
         },
         apiMarker01() {
             
         }
     },
     async mounted() {
-        // 引数があればそれに従いzoom,centerを変更
-        // 無ければ既定のものへと強引に値を変更
-        if(this.$route.params.z){
-            this.zoom = this.$route.params.z;
-        } else{
-            this.zoom = this.home[0];
-        }
-        if(this.$route.params.lat){
-            this.center.lat = this.$route.params.lat;
-        } else{
-            this.center.lat = this.home[1].lat;
-        }
-        if(this.$route.params.lon){
-            this.center.lng = this.$route.params.lon;
-        } else{
-            this.center.lng = this.home[1].lng;
-        }
         // this.$router.push({
         //     path:`/map/${this.zoom}/${this.center.lat}/${this.center.lng}`,
         // });
         // this.$nextTick(() => {
         //     // this.$refs.myMap.mapObject.setView(this.center);
         // });
-        // ひとまずgithubにある自分のjsonで
         const loadjson = (addURL)=>{
-            // const baseURL = "https://busroutemap.github.io/ttrmap/";
             const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
             return fetch(baseURL+addURL)
             .then(response=> {
@@ -117,11 +86,9 @@ export default {
             });
         };
         let pAll = [];
-        // pAll.push(loadjson("stopinfo/data_11.json"));
         // ひとまずエリア内のバス停を探す
-        console.log(process.env.VUE_APP_ODPT_TOKEN);
-        const lk = process.env.VUE_APP_ODPT_TOKEN;
-        pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${lk}`));
+        const vaot = process.env.VUE_APP_ODPT_TOKEN;
+        pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
         // ここにAPIを継ぎ足していく
         // then内のthis変更回避でthatを指定
         const that = this;

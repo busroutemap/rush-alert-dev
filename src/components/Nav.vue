@@ -3,11 +3,14 @@
     <nav>
       <div id="menu" class="p0 m0">
         <h1 id="title" class="item min3x">かけこみアラート</h1>
-        <h1 id="m1" class="item min2x"><a href="/map" class="a">マップモード</a></h1>
-        <h1 id="m2" class="item min2x"><a href="/detail" class="a">詳細モード</a></h1>
+        <h1 id="m1" class="item min2x">
+          <router-link to="/map" class="a">マップモード</router-link>
+        </h1>
+        <h1 id="m2" class="item min2x">
+          <router-link to="/detail" class="a">詳細モード</router-link>
+        </h1>
       </div>
     </nav>
-    <router-view class=""/>
   </div>
 </template>
 
