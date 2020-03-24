@@ -6,17 +6,26 @@ import MapTest from '../components/MapTest'
 
 Vue.use(VueRouter)
 
+// const homeZ = 11;
+// const homeLat = 36;
+// const homeLng = 140;
+
 const routes = [
-  {
-    path:'*',
-    name:'NotFound',
-    component:NotFound
-  },
   // {
   //   path: '/',
   //   name: 'Home',
   //   component: Home
   // },
+  // {
+  //   path:'/map/:z/:lat/:lon',
+  //   name:'MapTestFullURL',
+  //   component:MapTest
+  // },
+  {
+    path:'/map/:poi',
+    name:'MapTestFullURL',
+    component:MapTest
+  },
   {
     path:'/map',
     name:'MapTest',
@@ -31,7 +40,12 @@ const routes = [
     component: function () {
       return import(/* webpackChunkName: "about" */ '../views/About.vue')
     }
-  }
+  },
+  {
+    path:'*',
+    name:'NotFound',
+    component:NotFound
+  },
 ]
 
 const router = new VueRouter({
