@@ -1,27 +1,47 @@
 <template>
-    <!-- <l-map 
+    <l-map 
     ref="map"
     id="mapcontainer"
     v-bind:zoom="zoom"
     v-bind:center="center"
     @update:zoom="zoomUpdate"
     @update:center="centerUpdate"
-    > -->
-    <l-map ref="map" id="mapcontainer" v-bind:zoom="zoom" v-bind:center="center">
+    >
         <l-tile-layer 
         v-bind:url="url"
         v-bind:attribution="attribution"/>
-        <l-marker
+        <!-- <l-marker
         v-bind:lat-lng="marker01"
         >
             <l-popup>
                 <p>{{text}}</p>
             </l-popup>
-        </l-marker>
+        </l-marker> -->
+
         <!-- <v-locatecontrol
         v-bind:options='{setView:"false"}'
         /> -->
         <v-locatecontrol/>
+        <l-marker
+        :key="stop['@id']"
+        v-for="stop in nearStops"
+        :nearStops="nearStops"
+        v-bind:lat-lng="[stop['geo:lat'],stop['geo:long']]"
+        >
+            <l-popup>
+                <h2>{{stop['title']['ja']}}</h2>
+                <h3>{{stop['odpt:kana']}}</h3>
+                <p
+                v-for="operator in stop['odpt:operator']"
+                :key="operator"
+                >{{operator}}</p>
+            </l-popup>
+        </l-marker>
+        <l-control position="bottomleft" >
+            <button @click="getNearStops">
+            付近のバス停を探す
+            </button>
+        </l-control>
     </l-map>
 </template>
 
@@ -31,7 +51,8 @@ import {
     LMap,
     LTileLayer,
     LMarker,
-    LPopup
+    LPopup,
+    LControl
     } from 'vue2-leaflet';
 import { 
     latLng,
@@ -55,6 +76,7 @@ export default {
         LTileLayer,
         LMarker,
         LPopup,
+        LControl,
         'v-locatecontrol': Vue2LeafletLocatecontrol
     },
     computed:{
@@ -62,52 +84,44 @@ export default {
     watch: {
     },
     methods:{
-        zoomUpdate : async (zoom)=> {
+        zoomUpdate(zoom){
             this.zoom = zoom;
-            // await this.$nextTick();
         },
-        centerUpdate: async (center)=> {
+        centerUpdate(center) {
             this.center = center;
-            // await this.$nextTick();
         },
-    },
-    async mounted() {
-        // this.$router.push({
-        //     path:`/map/${this.zoom}/${this.center.lat}/${this.center.lng}`,
-        // });
-        // this.$nextTick(() => {
-        //     // this.$refs.myMap.mapObject.setView(this.center);
-        // });
-        const loadjson = (addURL)=>{
-            const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
-            return fetch(baseURL+addURL)
-            .then(response=> {
-                if (response.ok){
-                    // httpレスポンスからjsonを抽出
-                    return response.json();
-                } else{
-                    Promise.reject(new Error("error"))
-                }
-            })
+        async getNearStops(){
+            const loadjson = (addURL)=>{
+                const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
+                return fetch(baseURL+addURL)
+                .then(response=> {
+                    if (response.ok){
+                        // httpレスポンスからjsonを抽出
+                        return response.json();
+                    } else{
+                        Promise.reject(new Error("error"))
+                    }
+                })
+                .catch(e=>{
+                    console.log(e.message);
+                });
+            };
+            //---------------------------------------------
+            let pAll = [];
+            // ひとまずエリア内のバス停を探す
+            const vaot = process.env.VUE_APP_ODPT_TOKEN;
+            pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
+            this.nearStops = await Promise.all(pAll)
             .catch(e=>{
-                console.log(e.message);
+                console.log(e);
+            })
+            .then(r=>{
+                return r[0];
             });
-        };
-        let pAll = [];
-        // ひとまずエリア内のバス停を探す
-        const vaot = process.env.VUE_APP_ODPT_TOKEN;
-        pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
-        // ここにAPIを継ぎ足していく
-        // then内のthis変更回避でthatを指定
-        const that = this;
-        this.text = await Promise.all(pAll)
-        .catch(e=>{
-            console.log(e);
-        })
-        .then(r=>{
-            // console.log(r);
-            return r;
-        });
+            //---------------------------------------------
+            },
+    },
+    mounted() {
     },
     data(){
         return{
@@ -122,6 +136,7 @@ export default {
             // 半径300mを検索範囲内とする
             radius:300,
             myKey:"",
+            nearStops:[],
             // lcoption:{
             //     setView:"once",
             // }
