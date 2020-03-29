@@ -37,7 +37,9 @@ import {
     latLng,
     Icon 
     } from 'leaflet';
-import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol'
+// https://github.com/vUdav/vue2-leaflet-locatecontrol/issues/3 を参照
+// import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol'
+import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol/Vue2LeafletLocatecontrol'
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
