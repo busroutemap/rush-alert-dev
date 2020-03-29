@@ -99,7 +99,6 @@ export default {
         .then(r=>{
             // console.log(r);
             return r;
-            // return r[0][0]["バス停名"];
         });
     },
     data(){
@@ -108,7 +107,6 @@ export default {
             url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
             attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
             // このzoomとcenterの値はバグ回避で、実際の初期値はhome
-            // URLで指定がなければhomeの値を利用する
             zoom: 10,
             center: latLng(35,135),
             home: [11, latLng(36, 140)],
