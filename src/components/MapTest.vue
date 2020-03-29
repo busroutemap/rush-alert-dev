@@ -1,12 +1,13 @@
 <template>
-    <l-map 
+    <!-- <l-map 
     ref="map"
     id="mapcontainer"
     v-bind:zoom="zoom"
     v-bind:center="center"
     @update:zoom="zoomUpdate"
     @update:center="centerUpdate"
-    >
+    > -->
+    <l-map ref="map" id="mapcontainer" v-bind:zoom="zoom" v-bind:center="center">
         <l-tile-layer 
         v-bind:url="url"
         v-bind:attribution="attribution"/>
@@ -17,6 +18,10 @@
                 <p>{{text}}</p>
             </l-popup>
         </l-marker>
+        <!-- <v-locatecontrol
+        v-bind:options='{setView:"false"}'
+        /> -->
+        <v-locatecontrol/>
     </l-map>
 </template>
 
@@ -32,6 +37,7 @@ import {
     latLng,
     Icon 
     } from 'leaflet';
+import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol'
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -46,22 +52,22 @@ export default {
         LMap,
         LTileLayer,
         LMarker,
-        LPopup
+        LPopup,
+        'v-locatecontrol': Vue2LeafletLocatecontrol
     },
     computed:{
     },
     watch: {
     },
     methods:{
-        zoomUpdate(zoom) {
+        zoomUpdate : async (zoom)=> {
             this.zoom = zoom;
+            // await this.$nextTick();
         },
-        centerUpdate(center) {
+        centerUpdate: async (center)=> {
             this.center = center;
+            // await this.$nextTick();
         },
-        apiMarker01() {
-            
-        }
     },
     async mounted() {
         // this.$router.push({
@@ -107,18 +113,22 @@ export default {
             url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
             attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
             // このzoomとcenterの値はバグ回避で、実際の初期値はhome
-            zoom: 10,
-            center: latLng(35,135),
-            home: [11, latLng(36, 140)],
+            zoom: 13,
+            center: latLng(35.55,139.8),
+            // home: [11, latLng(36, 140)],
             marker01: latLng(35.678367, 139.763465),
             // 半径300mを検索範囲内とする
             radius:300,
             myKey:"",
+            // lcoption:{
+            //     setView:"once",
+            // }
         }
     }
 };
 </script>
 <style scoped>
+@import "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css";
 #mapcontainer{
     margin:0px;
     border: 1px solid black;
