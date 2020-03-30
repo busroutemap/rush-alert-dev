@@ -36,7 +36,7 @@
                 v-for="operator in stop['odpt:operator']"
                 :key="operator"
                 >{{operator}}</p>
-                <p class="distance"></p>
+                <p class="distance">現在地から{{stop['kotodu:distance']}}m</p>
             </l-popup>
         </l-marker>
         <l-control position="bottomleft" >
@@ -124,7 +124,7 @@ export default {
             for(let i = 0;i < this.nearStops.length;i++){
                 const stop = this.nearStops[i];
                 this.distances[i] = this.getDistance(stop['geo:lat'],stop['geo:long']);
-                // document.getElementById(`${stop['@id']}`).querySelector(".distance").textContent=this.distances[i];
+                stop["kotodu:distance"]= Math.round(this.distances[i]);
             }
             //---------------------------------------------
         },
@@ -149,8 +149,9 @@ export default {
             // 1m弱の誤差はあるはず
             const lngDis = Math.cos(radians(baseLatLng.lat))*radians(lng-baseLatLng.lng)*earthR;
             // 距離差(km)=(準備1^2+準備2^2)の平方根
-            const distance = Math.sqrt(Math.pow(latDis,2)+Math.pow(lngDis,2));
-            return distance*1000;
+            const distance = Math.sqrt(Math.pow(latDis,2)+Math.pow(lngDis,2))*1000;
+            // 6桁で揃えて返す
+            return distance.toFixed(6);
         }
     },
     mounted() {
