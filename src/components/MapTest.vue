@@ -27,6 +27,7 @@
         v-for="stop in nearStops"
         :nearStops="nearStops"
         v-bind:lat-lng="[stop['geo:lat'],stop['geo:long']]"
+        v-bind:id="stop['@id']"
         >
             <l-popup>
                 <h2>{{stop['title']['ja']}}</h2>
@@ -35,6 +36,7 @@
                 v-for="operator in stop['odpt:operator']"
                 :key="operator"
                 >{{operator}}</p>
+                <p class="distance"></p>
             </l-popup>
         </l-marker>
         <l-control position="bottomleft" >
@@ -118,8 +120,38 @@ export default {
             .then(r=>{
                 return r[0];
             });
+            // getDistanceメソッドを用いて距離を算出する
+            for(let i = 0;i < this.nearStops.length;i++){
+                const stop = this.nearStops[i];
+                this.distances[i] = this.getDistance(stop['geo:lat'],stop['geo:long']);
+                // document.getElementById(`${stop['@id']}`).querySelector(".distance").textContent=this.distances[i];
+            }
             //---------------------------------------------
-            },
+        },
+        /**
+         * 中心位置(又は現在位置)から引数の緯度経度まで何m離れているか
+         * @param lat
+         * @param lng
+         * @returns distance*1000 kmをmに変換し返す
+         */
+        getDistance(lat,lng){
+            // 暫定的にcenterと比較
+            // earthRはkm
+            const earthR = 6378.137;
+            const radians= (degrees)=>{
+                return degrees * Math.PI / 180
+            }
+            const baseLatLng = this.center;
+            // 準備1=ラジアン化した緯度差*地球半径
+            const latDis = radians(lat-baseLatLng.lat)*earthR;
+            // 準備2=ラジアン化した基準緯度のコサイン*ラジアン化した経度差*地球半径
+            // 似たような緯度で計算するとみなし、準備2の経度差で誤差を許容している
+            // 1m弱の誤差はあるはず
+            const lngDis = radians(baseLatLng.lat)*Math.cos(radians(lng^baseLatLng));
+            // 距離差(km)=(準備1^2+準備2^2)の平方根
+            const distance = Math.sqrt(Math.pow(latDis,2)+Math.pow(lngDis,2));
+            return distance*1000;
+        }
     },
     mounted() {
     },
@@ -137,6 +169,7 @@ export default {
             radius:300,
             myKey:"",
             nearStops:[],
+            distances:[]
             // lcoption:{
             //     setView:"once",
             // }
@@ -156,5 +189,8 @@ export default {
     bottom:0px;
     width:99.9vw;
     height:93.5vh;
+}
+.distance{
+    color:green;
 }
 </style>
