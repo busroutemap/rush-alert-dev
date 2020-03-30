@@ -147,7 +147,7 @@ export default {
             // 準備2=ラジアン化した基準緯度のコサイン*ラジアン化した経度差*地球半径
             // 似たような緯度で計算するとみなし、準備2の経度差で誤差を許容している
             // 1m弱の誤差はあるはず
-            const lngDis = radians(baseLatLng.lat)*Math.cos(radians(lng^baseLatLng));
+            const lngDis = Math.cos(radians(baseLatLng.lat))*radians(lng-baseLatLng.lng)*earthR;
             // 距離差(km)=(準備1^2+準備2^2)の平方根
             const distance = Math.sqrt(Math.pow(latDis,2)+Math.pow(lngDis,2));
             return distance*1000;
