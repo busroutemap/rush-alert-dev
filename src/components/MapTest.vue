@@ -30,7 +30,8 @@
         v-bind:id="stop['@id']"
         >
             <l-popup>
-                <h2>{{stop['title']['ja']}}</h2>
+                <!-- <h2>{{stop['title']['ja']}}</h2> -->
+                <h2>{{stop['dc:title']}}</h2>
                 <h3>{{stop['odpt:kana']}}</h3>
                 <p
                 v-for="operator in stop['odpt:operator']"
