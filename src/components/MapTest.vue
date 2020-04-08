@@ -135,7 +135,7 @@ export default {
          * @returns distance*1000 kmをmに変換し返す
          */
         getDistance(lat,lng){
-            const map = this.$refs.map.mapObject;
+            let map = this.$refs.map.mapObject;
             const distance = map.distance([lat,lng],this.center);
             return distance;
         }
@@ -164,7 +164,7 @@ export default {
     }
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
 @import "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css";
 #mapcontainer{
     margin:0px;
@@ -176,8 +176,9 @@ export default {
     bottom:0px;
     width:99.9vw;
     height:93.5vh;
-}
-.distance{
-    color:green;
+
+    .distance{
+        color:green;
+    }
 }
 </style>
