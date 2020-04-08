@@ -111,7 +111,7 @@ export default {
             //---------------------------------------------
             let pAll = [];
             // ひとまずエリア内のバス停を探す
-            const vaot = process.env.VUE_APP_ODPT_TOKEN;
+            const vaot = process.env.VUE_APP_odpt_token;
             pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
             this.nearStops = await Promise.all(pAll)
             .catch(e=>{
@@ -135,23 +135,9 @@ export default {
          * @returns distance*1000 kmをmに変換し返す
          */
         getDistance(lat,lng){
-            // 暫定的にcenterと比較
-            // earthRはkm
-            const earthR = 6378.137;
-            const radians= (degrees)=>{
-                return degrees * Math.PI / 180
-            }
-            const baseLatLng = this.center;
-            // 準備1=ラジアン化した緯度差*地球半径
-            const latDis = radians(lat-baseLatLng.lat)*earthR;
-            // 準備2=ラジアン化した基準緯度のコサイン*ラジアン化した経度差*地球半径
-            // 似たような緯度で計算するとみなし、準備2の経度差で誤差を許容している
-            // 1m弱の誤差はあるはず
-            const lngDis = Math.cos(radians(baseLatLng.lat))*radians(lng-baseLatLng.lng)*earthR;
-            // 距離差(km)=(準備1^2+準備2^2)の平方根
-            const distance = Math.sqrt(Math.pow(latDis,2)+Math.pow(lngDis,2))*1000;
-            // 6桁で揃えて返す
-            return distance.toFixed(6);
+            const map = this.$refs.map.mapObject;
+            const distance = map.distance([lat,lng],this.center);
+            return distance;
         }
     },
     mounted() {
