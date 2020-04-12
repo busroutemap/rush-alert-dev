@@ -44,6 +44,10 @@
             <button @click="getNearStops">
             付近のバス停を探す
             </button>
+            <div>
+            <button @click="put">マーカーでの現在地指定</button>
+            <button @click="rem">削除</button>
+            </div>
         </l-control>
     </l-map>
 </template>
@@ -133,12 +137,55 @@ export default {
          * 中心位置(又は現在位置)から引数の緯度経度まで何m離れているか
          * @param lat
          * @param lng
-         * @returns distance*1000 kmをmに変換し返す
+         * @returns distance
          */
         getDistance(lat,lng){
             let map = this.$refs.map.mapObject;
             const distance = map.distance([lat,lng],this.center);
             return distance;
+        },
+        put(){
+            const map = this.$refs.map.mapObject;
+            if((!this.lockon)&&(!this.putMarker)){
+                this.here = map.getCenter();
+                const theVue=this;
+                // 自作Llocate作るなら以下？
+                // map.locate({
+                //     watch:true,
+                //     setView:true,
+                //     // 高性能モードはオフ
+                //     enableHighAccuracy:false
+                // });
+                const markerOption = {
+                    title:"仮想現在地",
+                    alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
+                    // マウスを近づけると押しのけて最上位表示される
+                    riseOnHover:true,
+                    draggable:true,
+
+                };
+                const popupContent = '<h2>現在地マーカー</h2><br><p>マーカーは移動できます</p><button onclick="this.rem()">削除</button>';
+                // 置いたらボタンスタイル変えたいけど。
+                // 本当は以下のような指定微妙じゃ？
+
+                const putLocate = L.marker(this.here,markerOption);
+                putLocate.bindPopup(popupContent);
+                putLocate.on('dragend', ()=>{
+                    theVue.here = putLocate.getLatLng();
+                    console.log(theVue.here);
+                });
+                map.addLayer(putLocate);
+                this.lockon = true;
+                this.putMarker = true;
+            }
+        },
+        rem(){
+            const map = this.$refs.map.mapObject;
+            if(this.lockon&&this.putMarker){
+                map.removeLayer(putLocate);
+                this.lockon = false;
+                this.putMarker = false;
+            }
         }
     },
     mounted() {
@@ -148,13 +195,16 @@ export default {
             text:"hello",
             url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
             attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
-            // このzoomとcenterの値はバグ回避で、実際の初期値はhome
+            dummy : latLng(35.55,139.8),
             zoom: 13,
             center: latLng(35.55,139.8),
-            // home: [11, latLng(36, 140)],
             marker01: latLng(35.678367, 139.763465),
             // 半径300mを検索範囲内とする
             radius:300,
+            // dummy
+            here : latLng(35.678367, 139.763465),
+            lockon : false,
+            putMarker : false,
             myKey:"",
             nearStops:[],
             distances:[]
