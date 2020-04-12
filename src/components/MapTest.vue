@@ -117,7 +117,7 @@ export default {
             let pAll = [];
             // ひとまずエリア内のバス停を探す
             const vaot = process.env.VUE_APP_odpt_token;
-            pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
+            pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.here.lat}&lon=${this.here.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
             this.nearStops = await Promise.all(pAll)
             .catch(e=>{
                 console.log(e);
@@ -172,6 +172,7 @@ export default {
                 putLocate.bindPopup(popupContent);
                 putLocate.on('dragend', ()=>{
                     theVue.here = putLocate.getLatLng();
+                    console.log(putLocate.getLatLng().lat);
                     console.log(theVue.here);
                 });
                 map.addLayer(putLocate);
@@ -200,7 +201,7 @@ export default {
             center: latLng(35.55,139.8),
             marker01: latLng(35.678367, 139.763465),
             // 半径300mを検索範囲内とする
-            radius:300,
+            radius:1000,
             // dummy
             here : latLng(35.678367, 139.763465),
             lockon : false,
