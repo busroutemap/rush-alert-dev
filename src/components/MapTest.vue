@@ -125,24 +125,14 @@ export default {
             .then(r=>{
                 return r[0];
             });
+            const map = this.$refs.map.mapObject;
             // getDistanceメソッドを用いて距離を算出する
             for(let i = 0;i < this.nearStops.length;i++){
                 const stop = this.nearStops[i];
-                this.distances[i] = this.getDistance(stop['geo:lat'],stop['geo:long']);
-                stop["kotodu:distance"]= Math.round(this.distances[i]);
+                this.distances[i] = map.distance([stop['geo:lat'],stop['geo:long']],this.center);
+                stop["kotodu:distance"] = Math.round(this.distances[i]);
             }
             //---------------------------------------------
-        },
-        /**
-         * 中心位置(又は現在位置)から引数の緯度経度まで何m離れているか
-         * @param lat
-         * @param lng
-         * @returns distance
-         */
-        getDistance(lat,lng){
-            let map = this.$refs.map.mapObject;
-            const distance = map.distance([lat,lng],this.center);
-            return distance;
         },
         put(){
             const map = this.$refs.map.mapObject;
