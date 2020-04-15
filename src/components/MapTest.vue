@@ -8,26 +8,26 @@
     @update:center="centerUpdate"
     >
         <l-tile-layer 
-        v-bind:url="url"
-        v-bind:attribution="attribution"/>
-        <!-- <l-marker
-        v-bind:lat-lng="marker01"
+        :url="url"
+        :attribution="attribution"/>
+        <l-marker
+        :lat-lng="here"
+        v-if="(lockon)&&(putMarker)"
+        :options=putMarkerOption
         >
             <l-popup>
-                <p>{{text}}</p>
+                <h2>現在地マーカー</h2>
+                <p>マーカーは移動できます</p>
+                <button @click="rem()">削除</button>
             </l-popup>
-        </l-marker> -->
-
-        <!-- <v-locatecontrol
-        v-bind:options='{setView:"false"}'
-        /> -->
+        </l-marker>
         <v-locatecontrol/>
         <l-marker
         :key="stop['@id']"
         v-for="stop in nearStops"
         :nearStops="nearStops"
-        v-bind:lat-lng="[stop['geo:lat'],stop['geo:long']]"
-        v-bind:id="stop['@id']"
+        :lat-lng="[stop['geo:lat'],stop['geo:long']]"
+        :id="stop['@id']"
         >
             <l-popup>
                 <!-- <h2>{{stop['title']['ja']}}</h2> -->
@@ -44,6 +44,10 @@
             <button @click="getNearStops">
             付近のバス停を探す
             </button>
+            <div>
+            <button @click="put">マーカーでの現在地指定</button>
+            <button @click="rem">削除</button>
+            </div>
         </l-control>
     </l-map>
 </template>
@@ -113,7 +117,7 @@ export default {
             let pAll = [];
             // ひとまずエリア内のバス停を探す
             const vaot = process.env.VUE_APP_odpt_token;
-            pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.center.lat}&lon=${this.center.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
+            pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.here.lat}&lon=${this.here.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
             this.nearStops = await Promise.all(pAll)
             .catch(e=>{
                 console.log(e);
@@ -133,12 +137,35 @@ export default {
          * 中心位置(又は現在位置)から引数の緯度経度まで何m離れているか
          * @param lat
          * @param lng
-         * @returns distance*1000 kmをmに変換し返す
+         * @returns distance
          */
         getDistance(lat,lng){
             let map = this.$refs.map.mapObject;
             const distance = map.distance([lat,lng],this.center);
             return distance;
+        },
+        put(){
+            const map = this.$refs.map.mapObject;
+            if((!this.lockon)&&(!this.putMarker)){
+                // 現在地していなく、かつマーカーないなら
+                this.here = map.getCenter();
+                // 自作Llocate作るなら以下？
+                // map.locate({
+                //     watch:true,
+                //     setView:true,
+                //     // 高性能モードはオフ
+                //     enableHighAccuracy:false
+                // });
+                this.lockon = true;
+                this.putMarker = true;
+            }
+        },
+        rem(){
+            const map = this.$refs.map.mapObject;
+            if(this.lockon&&this.putMarker){
+                this.lockon = false;
+                this.putMarker = false;
+            }
         }
     },
     mounted() {
@@ -148,19 +175,25 @@ export default {
             text:"hello",
             url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
             attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
-            // このzoomとcenterの値はバグ回避で、実際の初期値はhome
+            dummy : latLng(35.55,139.8),
             zoom: 13,
             center: latLng(35.55,139.8),
-            // home: [11, latLng(36, 140)],
             marker01: latLng(35.678367, 139.763465),
             // 半径300mを検索範囲内とする
-            radius:300,
+            radius:1000,
+            // dummy
+            here : latLng(35.678367, 139.763465),
+            lockon : false,
+            putMarker : false,
             myKey:"",
             nearStops:[],
-            distances:[]
-            // lcoption:{
-            //     setView:"once",
-            // }
+            distances:[],
+            putMarkerOption:{
+                title:"仮想現在地",
+                alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
+                riseOnHover:true,
+                draggable:true
+            }
         }
     }
 };
