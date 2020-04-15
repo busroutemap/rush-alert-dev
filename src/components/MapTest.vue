@@ -8,26 +8,26 @@
     @update:center="centerUpdate"
     >
         <l-tile-layer 
-        v-bind:url="url"
-        v-bind:attribution="attribution"/>
-        <!-- <l-marker
-        v-bind:lat-lng="marker01"
+        :url="url"
+        :attribution="attribution"/>
+        <l-marker
+        :lat-lng="here"
+        v-if="(lockon)&&(putMarker)"
+        :options=putMarkerOption
         >
             <l-popup>
-                <p>{{text}}</p>
+                <h2>現在地マーカー</h2>
+                <p>マーカーは移動できます</p>
+                <button @click="rem()">削除</button>
             </l-popup>
-        </l-marker> -->
-
-        <!-- <v-locatecontrol
-        v-bind:options='{setView:"false"}'
-        /> -->
+        </l-marker>
         <v-locatecontrol/>
         <l-marker
         :key="stop['@id']"
         v-for="stop in nearStops"
         :nearStops="nearStops"
-        v-bind:lat-lng="[stop['geo:lat'],stop['geo:long']]"
-        v-bind:id="stop['@id']"
+        :lat-lng="[stop['geo:lat'],stop['geo:long']]"
+        :id="stop['@id']"
         >
             <l-popup>
                 <!-- <h2>{{stop['title']['ja']}}</h2> -->
@@ -147,8 +147,8 @@ export default {
         put(){
             const map = this.$refs.map.mapObject;
             if((!this.lockon)&&(!this.putMarker)){
+                // 現在地していなく、かつマーカーないなら
                 this.here = map.getCenter();
-                const theVue=this;
                 // 自作Llocate作るなら以下？
                 // map.locate({
                 //     watch:true,
@@ -156,26 +156,6 @@ export default {
                 //     // 高性能モードはオフ
                 //     enableHighAccuracy:false
                 // });
-                const markerOption = {
-                    title:"仮想現在地",
-                    alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
-                    // マウスを近づけると押しのけて最上位表示される
-                    riseOnHover:true,
-                    draggable:true,
-
-                };
-                const popupContent = '<h2>現在地マーカー</h2><br><p>マーカーは移動できます</p><button onclick="this.rem()">削除</button>';
-                // 置いたらボタンスタイル変えたいけど。
-                // 本当は以下のような指定微妙じゃ？
-
-                const putLocate = L.marker(this.here,markerOption);
-                putLocate.bindPopup(popupContent);
-                putLocate.on('dragend', ()=>{
-                    theVue.here = putLocate.getLatLng();
-                    console.log(putLocate.getLatLng().lat);
-                    console.log(theVue.here);
-                });
-                map.addLayer(putLocate);
                 this.lockon = true;
                 this.putMarker = true;
             }
@@ -183,7 +163,6 @@ export default {
         rem(){
             const map = this.$refs.map.mapObject;
             if(this.lockon&&this.putMarker){
-                map.removeLayer(putLocate);
                 this.lockon = false;
                 this.putMarker = false;
             }
@@ -208,10 +187,13 @@ export default {
             putMarker : false,
             myKey:"",
             nearStops:[],
-            distances:[]
-            // lcoption:{
-            //     setView:"once",
-            // }
+            distances:[],
+            putMarkerOption:{
+                title:"仮想現在地",
+                alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
+                riseOnHover:true,
+                draggable:true
+            }
         }
     }
 };
