@@ -22,9 +22,13 @@
             </l-popup>
         </l-marker>
         <v-locatecontrol/>
+        <!-- 雑だけどこんなのどうかな -->
+        <!-- 今はポップアップのみ違うが、将来的にはマーカーが変わる -->
+        <!-- 検索などする際にselectStopにselected===trueのものが代入される -->
         <l-marker
         :key="stop['@id']"
-        v-for="stop in nearStops"
+        v-for="stop in unSelectedStops"
+        v-show="!(stop['kotodu:selected'])"
         :nearStops="nearStops"
         :lat-lng="[stop['geo:lat'],stop['geo:long']]"
         :id="stop['@id']"
@@ -38,6 +42,27 @@
                 :key="operator"
                 >{{operator}}</p>
                 <p class="distance">現在地から{{stop['kotodu:distance']}}m</p>
+                <button @click="selectPOI(stop)">選択</button>
+            </l-popup>
+        </l-marker>
+        <l-marker
+        :key="stop['@id']"
+        v-for="stop in selectStops"
+        v-show="stop['kotodu:selected']"
+        :nearStops="nearStops"
+        :lat-lng="[stop['geo:lat'],stop['geo:long']]"
+        :id="stop['@id']"
+        >
+            <l-popup>
+                <h2>選択中！</h2>
+                <h2>{{stop['dc:title']}}</h2>
+                <h3>{{stop['odpt:kana']}}</h3>
+                <p
+                v-for="operator in stop['odpt:operator']"
+                :key="operator"
+                >{{operator}}</p>
+                <p class="distance">現在地から{{stop['kotodu:distance']}}m</p>
+                <button @click="selectPOI(stop)">選択</button>
             </l-popup>
         </l-marker>
         <l-control position="bottomleft" >
@@ -87,6 +112,16 @@ export default {
         'v-locatecontrol': Vue2LeafletLocatecontrol
     },
     computed:{
+        unSelectedStops(){
+            return this.nearStops.filter(stop=>{
+                return stop["kotodu:selected"] === false;
+            })
+        },
+        selectedStops(){
+            return this.nearStops.filter(stop=>{
+                return stop["kotodu:selected"] === true;
+            })
+        },
     },
     watch: {
     },
@@ -131,6 +166,7 @@ export default {
                 const stop = this.nearStops[i];
                 this.distances[i] = map.distance([stop['geo:lat'],stop['geo:long']],this.center);
                 stop["kotodu:distance"] = Math.round(this.distances[i]);
+                stop["kotodu:selected"] = false;
             }
             //---------------------------------------------
         },
@@ -156,6 +192,13 @@ export default {
                 this.lockon = false;
                 this.putMarker = false;
             }
+        },
+        selectPOI(clickedstop){
+            // 選択されていれば外す、そうでなければ追加
+            // うまく描画できてない。エラーは吐かないのだけど。
+            const i = this.nearStops.findIndex(stop=>stop['@id']===clickedstop['@id']);
+            let a = this.nearStops[i]["kotodu:selected"];
+            a = !a;
         }
     },
     mounted() {
@@ -177,12 +220,14 @@ export default {
             putMarker : false,
             myKey:"",
             nearStops:[],
+            selectStops:[],
             distances:[],
             putMarkerOption:{
                 title:"仮想現在地",
                 alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
                 riseOnHover:true,
-                draggable:true
+                draggable:true,
+                opacity:0.7
             }
         }
     }
