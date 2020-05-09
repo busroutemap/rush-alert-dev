@@ -58,6 +58,7 @@
             <button @click="showSelected">
                 選択済みを表示する
             </button>
+            <MapControl/>
         </l-control>
     </l-map>
 </template>
@@ -80,6 +81,12 @@ import {
 // import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol'
 import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol/Vue2LeafletLocatecontrol'
 
+//---------------------------------------------
+// 各種自作コンポーネント
+// 成功済み
+import MapControl from "./MapComponent/MapControl"
+import MarkerNearStops from "./MapComponent/NearStops"
+
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -95,7 +102,11 @@ export default {
         LMarker,
         LPopup,
         LControl,
-        'v-locatecontrol': Vue2LeafletLocatecontrol
+        'v-locatecontrol': Vue2LeafletLocatecontrol,
+        //---------------------------------------------
+        // 自作コンポーネント
+        MapControl,
+        MarkerNearStops
     },
     computed:{
     },
