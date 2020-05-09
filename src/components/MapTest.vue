@@ -10,6 +10,8 @@
         <l-tile-layer 
         :url="url"
         :attribution="attribution"/>
+        <!-- //--------------------------------------------- -->
+        <!-- 現在地マーカー -->
         <l-marker
         :lat-lng="here"
         v-if="(lockon)&&(putMarker)"
@@ -25,13 +27,14 @@
         <!-- 雑だけどこんなのどうかな -->
         <!-- 今はポップアップのみ違うが、将来的にはマーカーが変わる -->
         <!-- 検索などする際にselectStopにselected===trueのものが代入される -->
+        <!-- //--------------------------------------------- -->
         <l-marker
         :key="stop['@id']"
-        v-for="stop in unSelectedStops"
-        v-show="!(stop['kotodu:selected'])"
+        v-for="stop in nearStops"
         :nearStops="nearStops"
         :lat-lng="[stop['geo:lat'],stop['geo:long']]"
         :id="stop['@id']"
+        @click="selectPOI(stop)"
         >
             <l-popup>
                 <!-- <h2>{{stop['title']['ja']}}</h2> -->
@@ -42,37 +45,19 @@
                 :key="operator"
                 >{{operator}}</p>
                 <p class="distance">現在地から{{stop['kotodu:distance']}}m</p>
-                <button @click="selectPOI(stop)">選択</button>
-            </l-popup>
-        </l-marker>
-        <l-marker
-        :key="stop['@id']"
-        v-for="stop in selectStops"
-        v-show="stop['kotodu:selected']"
-        :nearStops="nearStops"
-        :lat-lng="[stop['geo:lat'],stop['geo:long']]"
-        :id="stop['@id']"
-        >
-            <l-popup>
-                <h2>選択中！</h2>
-                <h2>{{stop['dc:title']}}</h2>
-                <h3>{{stop['odpt:kana']}}</h3>
-                <p
-                v-for="operator in stop['odpt:operator']"
-                :key="operator"
-                >{{operator}}</p>
-                <p class="distance">現在地から{{stop['kotodu:distance']}}m</p>
-                <button @click="selectPOI(stop)">選択</button>
             </l-popup>
         </l-marker>
         <l-control position="bottomleft" >
             <button @click="getNearStops">
-            付近のバス停を探す
+                付近のバス停を探す
             </button>
             <div>
-            <button @click="put">マーカーでの現在地指定</button>
-            <button @click="rem">削除</button>
+                <button @click="put">マーカーでの現在地指定</button>
+                <button @click="rem">削除</button>
             </div>
+            <button @click="showSelected">
+                選択済みを表示する
+            </button>
         </l-control>
     </l-map>
 </template>
@@ -84,7 +69,8 @@ import {
     LTileLayer,
     LMarker,
     LPopup,
-    LControl
+    LControl,
+    LIcon
     } from 'vue2-leaflet';
 import { 
     latLng,
@@ -112,16 +98,6 @@ export default {
         'v-locatecontrol': Vue2LeafletLocatecontrol
     },
     computed:{
-        unSelectedStops(){
-            return this.nearStops.filter(stop=>{
-                return stop["kotodu:selected"] === false;
-            })
-        },
-        selectedStops(){
-            return this.nearStops.filter(stop=>{
-                return stop["kotodu:selected"] === true;
-            })
-        },
     },
     watch: {
     },
@@ -196,9 +172,19 @@ export default {
         selectPOI(clickedstop){
             // 選択されていれば外す、そうでなければ追加
             // うまく描画できてない。エラーは吐かないのだけど。
+            console.log("む");
             const i = this.nearStops.findIndex(stop=>stop['@id']===clickedstop['@id']);
-            let a = this.nearStops[i]["kotodu:selected"];
-            a = !a;
+            console.log("index:"+i);
+            // falseにはできた
+            this.nearStops[i]["kotodu:selected"] = !this.nearStops[i]["kotodu:selected"];
+        },
+        showSelected(){
+            const showStops = this.nearStops.filter(stop=>{
+                return stop["kotodu:selected"] === true;
+            });
+            showStops.forEach(e => {
+                console.log("選択バス停"+e["dc:title"]+"まで"+e["kotodu:distance"]+"m");
+            });
         }
     },
     mounted() {
@@ -213,7 +199,7 @@ export default {
             center: latLng(35.55,139.8),
             marker01: latLng(35.678367, 139.763465),
             // 半径300mを検索範囲内とする
-            radius:1000,
+            radius:300,
             // dummy
             here : latLng(35.678367, 139.763465),
             lockon : false,
