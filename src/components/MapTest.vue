@@ -10,6 +10,8 @@
         <l-tile-layer 
         :url="url"
         :attribution="attribution"/>
+        <!-- //--------------------------------------------- -->
+        <!-- 現在地マーカー -->
         <l-marker
         :lat-lng="here"
         v-if="(lockon)&&(putMarker)"
@@ -22,12 +24,17 @@
             </l-popup>
         </l-marker>
         <v-locatecontrol/>
+        <!-- 雑だけどこんなのどうかな -->
+        <!-- 今はポップアップのみ違うが、将来的にはマーカーが変わる -->
+        <!-- 検索などする際にselectStopにselected===trueのものが代入される -->
+        <!-- //--------------------------------------------- -->
         <l-marker
         :key="stop['@id']"
         v-for="stop in nearStops"
         :nearStops="nearStops"
         :lat-lng="[stop['geo:lat'],stop['geo:long']]"
         :id="stop['@id']"
+        @click="selectPOI(stop)"
         >
             <l-popup>
                 <!-- <h2>{{stop['title']['ja']}}</h2> -->
@@ -42,12 +49,15 @@
         </l-marker>
         <l-control position="bottomleft" >
             <button @click="getNearStops">
-            付近のバス停を探す
+                付近のバス停を探す
             </button>
             <div>
-            <button @click="put">マーカーでの現在地指定</button>
-            <button @click="rem">削除</button>
+                <button @click="put">マーカーでの現在地指定</button>
+                <button @click="rem">削除</button>
             </div>
+            <button @click="showSelected">
+                選択済みを表示する
+            </button>
         </l-control>
     </l-map>
 </template>
@@ -59,7 +69,8 @@ import {
     LTileLayer,
     LMarker,
     LPopup,
-    LControl
+    LControl,
+    LIcon
     } from 'vue2-leaflet';
 import { 
     latLng,
@@ -131,6 +142,7 @@ export default {
                 const stop = this.nearStops[i];
                 this.distances[i] = map.distance([stop['geo:lat'],stop['geo:long']],this.center);
                 stop["kotodu:distance"] = Math.round(this.distances[i]);
+                stop["kotodu:selected"] = false;
             }
             //---------------------------------------------
         },
@@ -156,6 +168,23 @@ export default {
                 this.lockon = false;
                 this.putMarker = false;
             }
+        },
+        selectPOI(clickedstop){
+            // 選択されていれば外す、そうでなければ追加
+            // うまく描画できてない。エラーは吐かないのだけど。
+            console.log("む");
+            const i = this.nearStops.findIndex(stop=>stop['@id']===clickedstop['@id']);
+            console.log("index:"+i);
+            // falseにはできた
+            this.nearStops[i]["kotodu:selected"] = !this.nearStops[i]["kotodu:selected"];
+        },
+        showSelected(){
+            const showStops = this.nearStops.filter(stop=>{
+                return stop["kotodu:selected"] === true;
+            });
+            showStops.forEach(e => {
+                console.log("選択バス停"+e["dc:title"]+"まで"+e["kotodu:distance"]+"m");
+            });
         }
     },
     mounted() {
@@ -170,19 +199,21 @@ export default {
             center: latLng(35.55,139.8),
             marker01: latLng(35.678367, 139.763465),
             // 半径300mを検索範囲内とする
-            radius:1000,
+            radius:300,
             // dummy
             here : latLng(35.678367, 139.763465),
             lockon : false,
             putMarker : false,
             myKey:"",
             nearStops:[],
+            selectStops:[],
             distances:[],
             putMarkerOption:{
                 title:"仮想現在地",
                 alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
                 riseOnHover:true,
-                draggable:true
+                draggable:true,
+                opacity:0.7
             }
         }
     }
