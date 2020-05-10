@@ -2,14 +2,12 @@
     <l-map 
     ref="map"
     id="mapcontainer"
-    v-bind:zoom="zoom"
-    v-bind:center="center"
+    :zoom="zoom"
+    :center="center"
     @update:zoom="zoomUpdate"
     @update:center="centerUpdate"
     >
-        <l-tile-layer 
-        :url="url"
-        :attribution="attribution"/>
+        <BaseMap/>
         <!-- //--------------------------------------------- -->
         <!-- 現在地マーカー -->
         <l-marker
@@ -24,41 +22,25 @@
             </l-popup>
         </l-marker>
         <v-locatecontrol/>
-        <!-- 雑だけどこんなのどうかな -->
-        <!-- 今はポップアップのみ違うが、将来的にはマーカーが変わる -->
-        <!-- 検索などする際にselectStopにselected===trueのものが代入される -->
         <!-- //--------------------------------------------- -->
-        <l-marker
-        :key="stop['@id']"
-        v-for="stop in nearStops"
+        <MarkerNearStops
         :nearStops="nearStops"
-        :lat-lng="[stop['geo:lat'],stop['geo:long']]"
-        :id="stop['@id']"
-        @click="selectPOI(stop)"
-        >
-            <l-popup>
-                <!-- <h2>{{stop['title']['ja']}}</h2> -->
-                <h2>{{stop['dc:title']}}</h2>
-                <h3>{{stop['odpt:kana']}}</h3>
-                <p
-                v-for="operator in stop['odpt:operator']"
-                :key="operator"
-                >{{operator}}</p>
-                <p class="distance">現在地から{{stop['kotodu:distance']}}m</p>
-            </l-popup>
-        </l-marker>
+        :nearStopsDistances="nearStopsDistances"
+        @clickMarker="selectStopUpdate(i)"
+        />
+        <!-- //--------------------------------------------- -->
         <l-control position="bottomleft" >
-            <button @click="getNearStops">
-                付近のバス停を探す
-            </button>
             <div>
                 <button @click="put">マーカーでの現在地指定</button>
                 <button @click="rem">削除</button>
             </div>
+            <button @click="getNearStops">
+                付近のバス停を探す
+            </button>
             <button @click="showSelected">
                 選択済みを表示する
             </button>
-            <MapControl/>
+            <!-- <MapControl/> -->
         </l-control>
     </l-map>
 </template>
@@ -79,13 +61,14 @@ import {
     } from 'leaflet';
 // https://github.com/vUdav/vue2-leaflet-locatecontrol/issues/3 を参照
 // import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol'
-import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol/Vue2LeafletLocatecontrol'
+import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol/Vue2LeafletLocatecontrol';
 
 //---------------------------------------------
 // 各種自作コンポーネント
 // 成功済み
-import MapControl from "./MapComponent/MapControl"
-import MarkerNearStops from "./MapComponent/NearStops"
+// import {MapControl} from "./MapComponent/MapControl";
+import MarkerNearStops from "./MapComponent/NearStops";
+import BaseMap from "./MapComponent/BaseMap";
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -94,8 +77,10 @@ Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
+
 export default {
     name:'MapTest',
+
     components:{ 
         LMap,
         LTileLayer,
@@ -105,12 +90,26 @@ export default {
         'v-locatecontrol': Vue2LeafletLocatecontrol,
         //---------------------------------------------
         // 自作コンポーネント
-        MapControl,
-        MarkerNearStops
+        // MapControl,
+        MarkerNearStops,
+        BaseMap
     },
     computed:{
     },
     watch: {
+        nearStops: function(value){
+            this.nearStopsDistances = new Array(value.length);
+            this.nearStopsIsSelected = new Array(value.length);
+            const map = this.$refs.map.mapObject;
+            // getDistanceメソッドを用いて距離を算出し、配列に代入
+            // stopが選択済みかどうかの配列に、初期値でfalseを配列に代入
+            for(let i = 0;i < value.length;i++){
+                const stop = value[i];
+                const dis = map.distance([stop['geo:lat'],stop['geo:long']],this.here);
+                this.nearStopsDistances[i] = Math.round(dis);
+                this.nearStopsIsSelected[i] = false;
+            }
+        }
     },
     methods:{
         zoomUpdate(zoom){
@@ -118,6 +117,23 @@ export default {
         },
         centerUpdate(center) {
             this.center = center;
+        },
+        selectStopUpdate(index){
+            if(!isNaN(index)){
+                !this.nearStopsIsSelected[index];
+            }
+        },
+        getSelects(){
+            // 配列の値とそのindexを元に、要素をチェックし新しい配列を返す
+            return this.nearStops.filter((value,i)=>{
+                const isSelect = this.nearStopsIsSelected[i];
+                if(typeof isSelect === 'boolean'){
+                    if(isSelect){
+                        // boolean型でtrueなら返す
+                        return value;
+                    }
+                }
+            });
         },
         async getNearStops(){
             const loadjson = (addURL)=>{
@@ -147,17 +163,11 @@ export default {
             .then(r=>{
                 return r[0];
             });
-            const map = this.$refs.map.mapObject;
-            // getDistanceメソッドを用いて距離を算出する
-            for(let i = 0;i < this.nearStops.length;i++){
-                const stop = this.nearStops[i];
-                this.distances[i] = map.distance([stop['geo:lat'],stop['geo:long']],this.center);
-                stop["kotodu:distance"] = Math.round(this.distances[i]);
-                stop["kotodu:selected"] = false;
-            }
             //---------------------------------------------
         },
         put(){
+            // 現在地指定無ければ地図の中心で判定する、
+            // でも良いのかもしれない
             const map = this.$refs.map.mapObject;
             if((!this.lockon)&&(!this.putMarker)){
                 // 現在地していなく、かつマーカーないなら
@@ -180,15 +190,6 @@ export default {
                 this.putMarker = false;
             }
         },
-        selectPOI(clickedstop){
-            // 選択されていれば外す、そうでなければ追加
-            // うまく描画できてない。エラーは吐かないのだけど。
-            console.log("む");
-            const i = this.nearStops.findIndex(stop=>stop['@id']===clickedstop['@id']);
-            console.log("index:"+i);
-            // falseにはできた
-            this.nearStops[i]["kotodu:selected"] = !this.nearStops[i]["kotodu:selected"];
-        },
         showSelected(){
             const showStops = this.nearStops.filter(stop=>{
                 return stop["kotodu:selected"] === true;
@@ -202,9 +203,8 @@ export default {
     },
     data(){
         return{
-            text:"hello",
-            url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
-            attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
+            // url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
+            // attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
             dummy : latLng(35.55,139.8),
             zoom: 13,
             center: latLng(35.55,139.8),
@@ -217,8 +217,8 @@ export default {
             putMarker : false,
             myKey:"",
             nearStops:[],
-            selectStops:[],
-            distances:[],
+            nearStopsIsSelected:[],
+            nearStopsDistances:[],
             putMarkerOption:{
                 title:"仮想現在地",
                 alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
@@ -243,8 +243,8 @@ export default {
     width:99.9vw;
     height:93.5vh;
 
-    .distance{
-        color:green;
-    }
+    // .distance{
+    //     color:green;
+    // }
 }
 </style>
