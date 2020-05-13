@@ -2,22 +2,27 @@
     <div>
         <l-tile-layer 
         :url="url"
-        :attribution="attribution"/>
+        :attribution="attribution"
+        />
     </div>
 </template>
 <script>
 import Vue from 'vue';
 import L from 'leaflet';
 import { 
+    LMap,
     LTileLayer,
     } from 'vue2-leaflet';
-// import { 
-//     latLng,
-//     } from 'leaflet';
+import { 
+    latLng,
+    } from 'leaflet';
 export default{
     name:"BaseMap",
     components:{
+        LMap,
         LTileLayer,
+    },
+    props:{
     },
     data(){
         return{

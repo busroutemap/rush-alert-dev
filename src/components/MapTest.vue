@@ -8,39 +8,35 @@
     @update:center="centerUpdate"
     >
         <BaseMap/>
-        <!-- //--------------------------------------------- -->
-        <!-- 現在地マーカー -->
-        <l-marker
-        :lat-lng="here"
-        v-if="(lockon)&&(putMarker)"
-        :options=putMarkerOption
-        >
-            <l-popup>
-                <h2>現在地マーカー</h2>
-                <p>マーカーは移動できます</p>
-                <button @click="rem()">削除</button>
-            </l-popup>
-        </l-marker>
-        <v-locatecontrol/>
-        <!-- //--------------------------------------------- -->
+        <!-- <v-locatecontrol/> -->
+
+        <HereMarker
+        :here="here"
+        :lockon="lockon"
+        :putMarker="putMarker"
+        />
+
         <MarkerNearStops
         :nearStops="nearStops"
         :nearStopsDistances="nearStopsDistances"
-        @clickMarker="selectStopUpdate(i)"
+        @clickMarker="selectStopUpdate"
         />
-        <!-- //--------------------------------------------- -->
+
+        <MapControl
+        :lockon="lockon"
+        :putMarker="putMarker"
+        @lockChange="lockUpdate()"
+        @putMarkerChange="putMarkerUpdate()"
+        @hereChange="hereUpdate()"
+        />
+
         <l-control position="bottomleft" >
-            <div>
-                <button @click="put">マーカーでの現在地指定</button>
-                <button @click="rem">削除</button>
-            </div>
-            <button @click="getNearStops">
+            <button @click="getNearStops()">
                 付近のバス停を探す
             </button>
-            <button @click="showSelected">
-                選択済みを表示する
+            <button @click="getSelects()">
+                (開発用)選択済みを表示する
             </button>
-            <!-- <MapControl/> -->
         </l-control>
     </l-map>
 </template>
@@ -53,7 +49,7 @@ import {
     LMarker,
     LPopup,
     LControl,
-    LIcon
+    LIcon,
     } from 'vue2-leaflet';
 import { 
     latLng,
@@ -66,9 +62,10 @@ import Vue2LeafletLocatecontrol from 'vue2-leaflet-locatecontrol/Vue2LeafletLoca
 //---------------------------------------------
 // 各種自作コンポーネント
 // 成功済み
-// import {MapControl} from "./MapComponent/MapControl";
+import MapControl from "./MapComponent/MapControl";
 import MarkerNearStops from "./MapComponent/NearStops";
 import BaseMap from "./MapComponent/BaseMap";
+import HereMarker from "./MapComponent/HereMarker";
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -90,9 +87,10 @@ export default {
         'v-locatecontrol': Vue2LeafletLocatecontrol,
         //---------------------------------------------
         // 自作コンポーネント
-        // MapControl,
+        MapControl,
         MarkerNearStops,
-        BaseMap
+        BaseMap,
+        HereMarker,
     },
     computed:{
     },
@@ -114,22 +112,39 @@ export default {
     methods:{
         zoomUpdate(zoom){
             this.zoom = zoom;
+            console.log("ズーム:"+zoom);
         },
         centerUpdate(center) {
             this.center = center;
+            console.log("センター変更");
         },
         selectStopUpdate(index){
             if(!isNaN(index)){
-                !this.nearStopsIsSelected[index];
+                this.nearStopsIsSelected[index] = !this.nearStopsIsSelected[index];
             }
         },
+        lockUpdate(){
+            this.lockon = !this.lockon;
+            console.log("ロック:"+this.lockon);
+        },
+        putMarkerUpdate(){
+            this.putMarker = !this.putMarker;
+        },
+        hereUpdate(){
+            const map = this.$refs.map.mapObject;
+            this.here = map.getCenter();
+            console.log("here:"+this.here.lat);
+        },
+        //---------------------------------------------
         getSelects(){
             // 配列の値とそのindexを元に、要素をチェックし新しい配列を返す
             return this.nearStops.filter((value,i)=>{
                 const isSelect = this.nearStopsIsSelected[i];
+                console.log(i+"番目:"+isSelect)
                 if(typeof isSelect === 'boolean'){
                     if(isSelect){
                         // boolean型でtrueなら返す
+                        console.log("選択バス停"+value["dc:title"]);
                         return value;
                     }
                 }
@@ -165,67 +180,32 @@ export default {
             });
             //---------------------------------------------
         },
-        put(){
-            // 現在地指定無ければ地図の中心で判定する、
-            // でも良いのかもしれない
-            const map = this.$refs.map.mapObject;
-            if((!this.lockon)&&(!this.putMarker)){
-                // 現在地していなく、かつマーカーないなら
-                this.here = map.getCenter();
-                // 自作Llocate作るなら以下？
-                // map.locate({
-                //     watch:true,
-                //     setView:true,
-                //     // 高性能モードはオフ
-                //     enableHighAccuracy:false
-                // });
-                this.lockon = true;
-                this.putMarker = true;
-            }
-        },
-        rem(){
-            const map = this.$refs.map.mapObject;
-            if(this.lockon&&this.putMarker){
-                this.lockon = false;
-                this.putMarker = false;
-            }
-        },
-        showSelected(){
-            const showStops = this.nearStops.filter(stop=>{
-                return stop["kotodu:selected"] === true;
-            });
-            showStops.forEach(e => {
-                console.log("選択バス停"+e["dc:title"]+"まで"+e["kotodu:distance"]+"m");
-            });
-        }
     },
     mounted() {
     },
     data(){
         return{
-            // url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
-            // attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
             dummy : latLng(35.55,139.8),
+            //---------------------------------------------
+            // 地図中心座標関連
             zoom: 13,
             center: latLng(35.55,139.8),
+            //---------------------------------------------
             marker01: latLng(35.678367, 139.763465),
             // 半径300mを検索範囲内とする
             radius:300,
-            // dummy
+            //---------------------------------------------
+            // 現在地関連
+            // もしlockonでなければ、地図の中心で代用？
             here : latLng(35.678367, 139.763465),
             lockon : false,
             putMarker : false,
-            myKey:"",
+            //---------------------------------------------
             nearStops:[],
             nearStopsIsSelected:[],
             nearStopsDistances:[],
-            putMarkerOption:{
-                title:"仮想現在地",
-                alt:"位置情報を用いず、マーカーのドラッグ先を現在地とみなします",
-                riseOnHover:true,
-                draggable:true,
-                opacity:0.7
-            }
+            //---------------------------------------------
+
         }
     }
 };

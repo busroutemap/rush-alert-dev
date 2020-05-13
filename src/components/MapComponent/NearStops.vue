@@ -5,10 +5,9 @@
         :key="stop['@id']"
         :lat-lng="[stop['geo:lat'],stop['geo:long']]"
         :id="stop['@id']"
-        :i="i"
+        v-show="!isNaN(i)"
         @click="selectIndex(i)"
         >
-        <!-- @clickのiはNearStops定義時に未定義なので好ましくない、というエラー -->
             <l-popup
             >
                 <h2>{{stop['dc:title']}}</h2>
@@ -17,7 +16,9 @@
                 v-for="operator in stop['odpt:operator']"
                 :key="operator"
                 >{{operator}}</p>
-                <p class="distance">現在地から{{nearStopsDistances[i]}}m</p>
+                <p
+                class="distance"
+                >現在地から{{nearStopsDistances[i]}}m</p>
             </l-popup>
         </l-marker>
     </div>
@@ -31,6 +32,7 @@ import {
     LMarker,
     LPopup,
     LIcon,
+    LControl,
     } from 'vue2-leaflet';
 import { 
     latLng,
