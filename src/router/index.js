@@ -4,6 +4,8 @@ import Home from '../views/Home.vue'
 import NotFound from '../components/NotFound'
 import MapTest from '../components/MapTest'
 import 'leaflet/dist/leaflet.css'
+import 'bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 Vue.use(VueRouter)
 
