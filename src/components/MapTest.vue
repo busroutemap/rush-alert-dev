@@ -222,9 +222,5 @@ export default {
     bottom:0px;
     width:99.9vw;
     height:93.5vh;
-
-    // .distance{
-    //     color:green;
-    // }
 }
 </style>
