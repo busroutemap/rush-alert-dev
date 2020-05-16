@@ -4,10 +4,12 @@
     id="mapcontainer"
     :zoom="zoom"
     :center="center"
+    :options="{zoomControl: false}"
     @update:zoom="zoomUpdate"
     @update:center="centerUpdate"
     >
         <BaseMap/>
+        <l-control-zoom position="bottomright"/>
         <!-- <v-locatecontrol/> -->
 
         <HereMarker
@@ -50,6 +52,7 @@ import {
     LPopup,
     LControl,
     LIcon,
+    LControlZoom,
     } from 'vue2-leaflet';
 import { 
     latLng,
@@ -84,6 +87,7 @@ export default {
         LMarker,
         LPopup,
         LControl,
+        LControlZoom,
         'v-locatecontrol': Vue2LeafletLocatecontrol,
         //---------------------------------------------
         // 自作コンポーネント
@@ -211,16 +215,13 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$border:1280px;
 @import "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css";
 #mapcontainer{
-    margin:0px;
-    border: 1px solid black;
-    position: absolute;
-    top:6vh;
-    left:0px;
-    right:0px;
-    bottom:0px;
-    width:99.9vw;
-    height:93.5vh;
+    @media (min-width: $border){
+        // 基準値よりも画面サイズが大きい
+        width:50vw;
+        height:95vh;
+    }
 }
 </style>
