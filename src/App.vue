@@ -1,7 +1,13 @@
 <template>
-  <div id="app">
-    <headNav/>
-    <router-view/>
+  <div
+  id="app"
+  >
+    <headNav
+    class="hn"
+    />
+    <router-view
+    class="main"
+    />
   </div>
 </template>
 <script>
@@ -14,24 +20,22 @@ export default {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
+$border:1280px;
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  // width:100vw;
+  // height:100vh;
 }
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
+.hn{
+  @media (min-width: $border){
+    // 基準値よりも画面サイズが大きい
+    height:5vh;
+    @media(max-height:600px){
+      height:30px;
     }
   }
 }
