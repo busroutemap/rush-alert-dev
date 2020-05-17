@@ -4,9 +4,13 @@
     >
         <Map
         id="map"
+        @nearStopsGroupChange="this.nearStopsGroupUpdate"
         />
         <Detail
         id="detail"
+        :nearStops="this.nearStops"
+        :nearStopsIsSelected="this.nearStopsIsSelected"
+        :nearStopsDistances="this.nearStopsDistances"
         />
     </div>
 </template>
@@ -14,7 +18,7 @@
 <script>
 //---------------------------------------------
 import Map from './Map';
-import Detail from './Detail'
+import Detail from './Detail';
 
 export default {
     name:'Main',
@@ -27,11 +31,19 @@ export default {
     watch: {
     },
     methods:{
+        nearStopsGroupUpdate(nearStopsGroup){
+            this.nearStops=nearStopsGroup.nearStops;
+            this.nearStopsIsSelected=nearStopsGroup.nearStopsIsSelected;
+            this.nearStopsDistances=nearStopsGroup.nearStopsDistances;
+        }
     },
     mounted() {
     },
     data(){
         return{
+            nearStops:[],
+            nearStopsIsSelected:[],
+            nearStopsDistances:[]
         }
     }
 };

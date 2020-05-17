@@ -111,6 +111,11 @@ export default {
                 this.nearStopsDistances[i] = Math.round(dis);
                 this.nearStopsIsSelected[i] = false;
             }
+            this.$emit("nearStopsGroupChange",{
+                nearStops:this.nearStops,
+                nearStopsDistances:this.nearStopsDistances,
+                nearStopsIsSelected:this.nearStopsIsSelected,
+            });
         }
     },
     methods:{

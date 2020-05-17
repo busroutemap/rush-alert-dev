@@ -29,6 +29,7 @@ $border:1280px;
   text-align: center;
   // width:100vw;
   // height:100vh;
+  overflow: hidden;
 }
 .hn{
   @media (min-width: $border){
