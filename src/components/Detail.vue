@@ -1,16 +1,47 @@
 <template>
-    <div>
-        <p>詳細モードテスト</p>
+    <div id="detail">
+        <div
+        class="accordion"
+        :id="ac"
+        >
+            <Card
+            v-for="(stop,i) in nearStops"
+            :key="stop['@id']"
+            :cardId="'card:'+i"
+            :title="stop['dc:title']"
+            :parentId="ac"
+            />
+        </div>
     </div>
 </template>
 <script>
+import Card from './DetailComponent/Card';
 export default {
     name:'Detail',
+    components:{
+        Card,
+    },
+    props:{
+        nearStops:{
+            type:Array
+        },
+        nearStopsIsSelected:{
+            type:Array
+        },
+        nearStopsDistances:{
+            type:Array,
+        },
+    },
+    data(){
+        return{
+            ac:"accordionExample"
+        }
+    }
 }
 </script>
 <style scoped lang="scss">
 $border:1280px;
-div{
+#detail{
     background-color: #EEEEEE;
     border: solid 1px #000000;
     @media (min-width: $border){
@@ -23,5 +54,6 @@ div{
         width:100%;
         height:100%;
     }
+    overflow:auto;
 }
 </style>
