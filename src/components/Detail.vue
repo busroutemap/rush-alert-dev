@@ -10,6 +10,8 @@
             :cardId="'card:'+i"
             :title="stop['dc:title']"
             :parentId="ac"
+            :poleNum="stop['odpt:busstopPoleNumber']"
+            :routeName="stop['odpt:busroutePattern']"
             />
         </div>
     </div>

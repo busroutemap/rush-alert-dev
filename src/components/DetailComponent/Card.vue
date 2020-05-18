@@ -32,7 +32,11 @@
         class="collapse card-body"
         :data-parent="'#'+this.parentId"
         >
-            <p>選択バス停:{{this.title}}</p>
+            <ul>
+                <li> 名称 : {{this.title}}  </li>
+                <li> 標柱 : {{this.poleNum}} </li>
+                <li> 路線名称 : {{this.routeName}} </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -58,6 +62,13 @@ export default {
             required:true
         },
         parentId:{
+            type:String,
+            required:true
+        },
+        poleNum:{
+            type:String
+        },
+        routeName:{
             type:String,
             required:true
         }
