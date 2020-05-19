@@ -35,7 +35,10 @@
             <ul>
                 <li> 名称 : {{this.title}}  </li>
                 <li> 標柱 : {{this.poleNum}} </li>
-                <li> 路線名称 : {{this.routeName}} </li>
+                <li
+                v-for="route in this.routePatterns"
+                :key="route"
+                > 路線パターン : {{route}} </li>
             </ul>
         </div>
     </div>
@@ -68,8 +71,8 @@ export default {
         poleNum:{
             type:String
         },
-        routeName:{
-            type:String,
+        routePatterns:{
+            type:Array,
             required:true
         }
     },
