@@ -14,6 +14,9 @@
             aria-expanded="false"
             :aria-controls="this.bodyId"
             >
+                <span
+                v-show="isSelected"
+                >(選択中)</span>
                 {{this.title}}
             </button>
         </div>
@@ -73,6 +76,10 @@ export default {
         },
         routePatterns:{
             type:Array,
+            required:true
+        },
+        isSelected:{
+            type:Boolean,
             required:true
         }
     },

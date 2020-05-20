@@ -15,6 +15,8 @@
             :parentId="ac"
             :poleNum="stop['odpt:busstopPoleNumber']"
             :routePatterns="stop['odpt:busroutePattern']"
+            :i="i"
+            :isSelected="nearStopsIsSelected[i]"
             />
         </div>
     </div>
