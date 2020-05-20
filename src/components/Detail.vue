@@ -1,5 +1,8 @@
 <template>
     <div id="detail">
+        <div>
+            <p>現在の検索バス停数:{{this.nearStops.length}}</p>
+        </div>
         <div
         class="accordion"
         :id="ac"
@@ -7,7 +10,7 @@
             <Card
             v-for="(stop,i) in nearStops"
             :key="stop['@id']"
-            :cardId="'card:'+i"
+            :cardId="'card'+i"
             :title="stop['dc:title']"
             :parentId="ac"
             :poleNum="stop['odpt:busstopPoleNumber']"
