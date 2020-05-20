@@ -129,7 +129,8 @@ export default {
         },
         selectStopUpdate(index){
             if(!isNaN(index)){
-                this.nearStopsIsSelected[index] = !this.nearStopsIsSelected[index];
+                const isSelectedBefore = this.nearStopsIsSelected[index];
+                this.nearStopsIsSelected.splice(index,1,!isSelectedBefore);
             }
         },
         lockUpdate(){
