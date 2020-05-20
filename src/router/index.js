@@ -2,8 +2,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 // import Home from '../views/Home.vue';
 import NotFound from '../components/NotFound';
-// import Map from '../components/Map';
 import Main from '../components/Main';
+import Pin from '../components/Pin'
 import 'leaflet/dist/leaflet.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -11,11 +11,21 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 Vue.use(VueRouter);
 
 const routes = [
-  // {
-  //   path: '/map/:poi',
-  //   name: 'MapTestFullURL',
-  //   component: Main
-  // },
+  {
+    path: '/pin/:poiSameAs/',
+    name: 'PinRouter',
+    component: Pin,
+    props: (route) => ({
+      // URL /pin/(poiのID)/?q=vue は {query: 'vue'} をプロパティとする
+      // :poiSameAsはthis.$route.params.poiSameAsで受け取れる
+      query: route.query.q
+    })
+  },
+  {
+    path: '/pin/',
+    name: 'PinRedirect',
+    redirect:'/'
+  },
   {
     path: '/',
     name: 'Main',
