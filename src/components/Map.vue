@@ -79,7 +79,7 @@ Icon.Default.mergeOptions({
 
 
 export default {
-    name:'MapTest',
+    name:'Map',
 
     components:{ 
         LMap,
