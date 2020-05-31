@@ -2,13 +2,30 @@
     <div id="detail">
         <div>
             <p>現在の検索バス停数:{{this.nearStops.length}}</p>
+            <div
+            v-show="this.selectStops.length>0"
+            >
+                <p>{{this.selectStops[0]}}まで{{this.selectDistance[0]}}m</p>
+            </div>
+            <!-- 一時的に選択バス停の0番目で対応 -->
+            <!-- 将来的には複数バス停を？それとも単体？要検討 -->
+            <!-- クエリで何が必要になるのか？ -->
+            <button
+            v-show="this.selectStops.length>0"
+            @click="this.$router.push({
+                path: `/pin/${this.selectStops[0]}`,
+                query: { plan: 'private' }
+            })"
+            >
+                PIN
+            </button>
         </div>
         <div
         class="accordion"
         :id="ac"
         >
             <Card
-            v-for="(stop,i) in nearStops"
+            v-for="(stop,i) in this.nearStops"
             :key="stop['@id']"
             :cardId="'card'+i"
             :title="stop['dc:title']"
@@ -30,7 +47,9 @@ export default {
     },
     props:{
         nearStops:{
-            type:Array
+            type:Array,
+            default:[],
+            required:true
         },
         nearStopsIsSelected:{
             type:Array
@@ -38,6 +57,32 @@ export default {
         nearStopsDistances:{
             type:Array,
         },
+    },
+    computed:{
+        selectStops(){
+            // nearStopsのpropsエラー
+            return this.nearStops.filter((value,i)=>{
+                const isSelect = this.nearStopsIsSelected[i];
+                console.log(i+"番目:"+isSelect);
+                if(typeof isSelect === 'boolean'){
+                    if(isSelect){
+                        // boolean型でtrueなら返す
+                        console.log("選択バス停"+value["dc:title"]);
+                        return value;
+                    }
+                }
+            });
+        },
+        selectDistance(){
+            return this.nearStopsDistances.filter((value,i)=>{
+                const isSelect = this.nearStopsIsSelected[i];
+                if(typeof isSelect === 'boolean'){
+                    if(isSelect){
+                        return value;
+                    }
+                }
+            })
+        }
     },
     data(){
         return{
