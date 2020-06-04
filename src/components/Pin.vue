@@ -15,6 +15,11 @@ export default {
             
         })
     },
+    computed:{
+        poiSameAs(){
+            return this.$route.params.poiSameAs;
+        }
+    },
     methods:{
         getLocation(){
             /**
