@@ -12,10 +12,7 @@
             <!-- クエリで何が必要になるのか？ -->
             <button
             v-show="this.selectStops.length>0"
-            @click="this.$router.push({
-                path: `/pin/${this.selectStops[0]}`,
-                query: { plan: 'private' }
-            })"
+            @click="pushPin"
             >
                 PIN
             </button>
@@ -80,6 +77,19 @@ export default {
                     if(isSelect){
                         return value;
                     }
+                }
+            })
+        }
+    },
+    methods:{
+        pushPin(){
+            const sameAs = this.selectStops[0]["owl:sameAs"];
+            this.$router.push({
+                // 以下だとこうなる
+                // http://localhost:8080/pin/odpt.BusstopPole:Toei.Shinhamakawabashi.735.1?plan=private
+                path: `/pin/${sameAs}`,
+                query: {
+                    plan: 'private'
                 }
             })
         }
