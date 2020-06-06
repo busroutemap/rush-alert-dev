@@ -89,7 +89,8 @@ export default {
                 // http://localhost:8080/pin/odpt.BusstopPole:Toei.Shinhamakawabashi.735.1?plan=private
                 path: `/pin/${sameAs}`,
                 query: {
-                    plan: 'private'
+                    here: '',
+                    pinRoute:'',
                 }
             })
         }
