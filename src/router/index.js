@@ -18,7 +18,7 @@ const routes = [
     props: (route) => ({
       // URL /pin/(poiのID)/?q=vue は {query: 'vue'} をプロパティとする
       // :poiSameAsはthis.$route.params.poiSameAsで受け取れる
-      query: route.query.q
+      // query: route.query.q
     })
   },
   {
