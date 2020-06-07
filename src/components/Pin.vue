@@ -1,6 +1,9 @@
 <template>
     <div>
-
+        <Headband/>
+        <UserCard/>
+        <!-- 前の便、次の便、おすすめ便ボタンを追加する -->
+        <BusCard/>
     </div>
 </template>
 <script>
