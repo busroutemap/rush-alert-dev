@@ -22,8 +22,16 @@ export default {
             //  ↓
             // (b)選択系統情報
             //    選択済み系統の情報は、細かく情報を取得
-
-
+            //    時刻、遅延情報、IC利用？、今日のダイヤ情報？
+            //    何停留所前か、
+            //---------------------------------------------
+            // (a)
+            this.pinStop = this.getThePoiData(this.poiSameAs);
+            const tmp = this.getTimeTablePoiAndTrip(this.poiSameAs,this.allRoutesSameAs)
+            // (c)※速度遅いがpromise allを別で行う
+            this.getNearStops();
+            // (d)
+            this.linesData = this.getRoutesData(this.allRoutesSameAs);
         })
     },
     computed:{
@@ -50,6 +58,12 @@ export default {
                 return dummy;
             }
         },
+        /**
+         * allRoutesSameAs : 該当停留所の別名
+         */
+        allRoutesSameAs(){
+            return this.pinStop["odpt:busroutePattern"];
+        }
     },
     watch:{
         // 利用者のロケーション情報が変わったら、平均も変わる
@@ -99,6 +113,7 @@ export default {
         /**
          * getThePoiData : (a)該当停留所情報
          * @param thePoiSameAs {String} 情報が欲しい停留所のsameAs
+         * @return {Object} 該当停留所の情報
          */
         async getThePoiData(thePoiSameAs){
             const loadjson = (addURL)=>{
@@ -120,13 +135,63 @@ export default {
             // 該当停留所を探す
             const vaot = process.env.VUE_APP_odpt_token;
             pAll.push(loadjson(`odpt:BusstopPole?owl:sameAs=${thePoiSameAs}&acl:consumerKey=${vaot}`));
-            this.pinStop = await Promise.all(pAll)
+            return await Promise.all(pAll)
             .catch(e=>{
                 console.log(e);
+                return {};
             })
             .then(r=>{
                 return r[0];
             });
+        },
+        /**
+         * getTimeTablePoiAndTrip : 選択停留所と選択系統の停留所&便時刻表を取得する
+         * 複雑になるので、これは別で今回作成
+         * @param poiSameAs {String}
+         * @param routeSameAsArray {Array}
+         * @return result {Array} 選択系統ごとの配列、[poiTimeTable(Array),tripTimeTable(Array)]がそれぞれ含まれる
+         */
+        async getTimeTablePoiAndTrip(poiSameAs,routeSameAsArray){
+            // カレンダー別名(odpt:Calendarのowl:sameAs)
+            // 路線別名
+            // 方面別名
+            // あたりも追加で必要
+            // ただ、カレンダーってどう取得する？
+            const loadjson = (addURL)=>{
+                const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
+                return fetch(baseURL+addURL)
+                .then(response=> {
+                    if (response.ok){
+                        // httpレスポンスからjsonを抽出
+                        return response.json();
+                    } else{
+                        Promise.reject(new Error("error"))
+                    }
+                })
+                .catch(e=>{
+                    console.log(e.message);
+                });
+            };
+            //---------------------------------------------
+            let pAll = [];
+            // ひとまずエリア内のバス停を探す
+            const vaot = process.env.VUE_APP_odpt_token;
+            const rsaa = routeSameAsArray;
+            rsaa.forEach(value=>{
+                // 各選択系統ごとに、該当停留所の時刻表と、系統の時刻表を取得する
+                pAll.push([
+                    loadjson(`odpt:BusstopPoleTimetable?odpt:busstopPole=${poiSameAs}&odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`),
+                    loadjson(`odpt:BusTimeTable?odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`)
+                ]);
+            })
+            return await Promise.all(pAll)
+            .catch(e=>{
+                console.log(e);
+            })
+            .then(r=>{
+                return r;
+            });
+            //---------------------------------------------
         },
         /**
          * getNearStops : (c) 周辺停留所情報
@@ -167,11 +232,11 @@ export default {
          * getRoutesData : (d)その他系統情報
          * 停留所に関わる一般的な情報を取得する
          * 基本は(a)の戻り値を引数に取る？またはVueのdataから？
-         * @param routeSameAsArray {Array} 取得してきたい系統の別名配列。
-         * @returns {Array} BusroutePattern配列。通常はこの関数の戻り値をthis.linesDataに代入する。
+         * @param routeSameAsArray {Array} 取得したい系統の別名配列。
+         * @return {Array} BusroutePattern配列。通常はこの関数の戻り値をthis.linesDataに代入する。
          * 失敗した場合、何もない配列を返す
          */
-        getRoutesData(routeSameAsArray){
+        async getRoutesData(routeSameAsArray){
             const rsaa = routeSameAsArray;
             const loadjson = (addURL)=>{
                 const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
@@ -207,7 +272,6 @@ export default {
                 console.log("sameAsArray Error!");
                 return [];
             }
-            
         },
         /**
          * getRealTimeTripData : (2)便情報
