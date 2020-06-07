@@ -1,14 +1,26 @@
 <template>
-    
+    <div>
+
+    </div>
 </template>
 <script>
+import Headband from './PinComponent/Headband';
+import UserCard from './PinComponent/UserCard';
+import BusCard from './PinComponent/BusCard';
+import PetitMap from './PinComponent/PetitMap';
+import LineList from './PinComponent/LineList';
+
 export default {
     name:"Pin",
     props:{
 
     },
     components:{
-
+        Headband,
+        UserCard,
+        BusCard,
+        PetitMap,
+        LineList
     },
     mounted:function(){
         this.$nextTick(()=>{
