@@ -29,7 +29,7 @@ export default {
             this.pinStop = this.getThePoiData(this.poiSameAs);
             const tmp = this.getTimeTablePoiAndTrip(this.poiSameAs,this.allRoutesSameAs)
             // (c)※速度遅いがpromise allを別で行う
-            this.getNearStops();
+            this.nearStops = this.getNearStops(userLocationData.lat,userLocationData.lng);
             // (d)
             this.linesData = this.getRoutesData(this.allRoutesSameAs);
         })
@@ -145,7 +145,7 @@ export default {
             });
         },
         /**
-         * getTimeTablePoiAndTrip : 選択停留所と選択系統の停留所&便時刻表を取得する
+         * getTimeTablePoiAndTrip : (b)選択停留所と選択系統の停留所&便時刻表を取得する
          * 複雑になるので、これは別で今回作成
          * @param poiSameAs {String}
          * @param routeSameAsArray {Array}
@@ -195,10 +195,12 @@ export default {
         },
         /**
          * getNearStops : (c) 周辺停留所情報
-         * これはまるごとMap/nearstopと同じなので、将来APIにまとめる
-         * 将来的には、lat,lngを引数にしたほうが良い……
+         * MapのNearStiosとは多少違う(引数や戻り値周辺)
+         * @param {Number} lat
+         * @param {Number} lng
+         * @return {Array} nearStops
          */
-        async getNearStops(){
+        async getNearStops(lat,lng){
             const loadjson = (addURL)=>{
                 const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
                 return fetch(baseURL+addURL)
@@ -216,10 +218,17 @@ export default {
             };
             //---------------------------------------------
             let pAll = [];
+            if(lat==null||lng==null){
+                const nlat = this.pinStop["geo:lat"];
+                const nlng = this.pinStop["geo:long"];
+            } else{
+                const nlat = lat;
+                const nlng = lng;
+            }
             // ひとまずエリア内のバス停を探す
             const vaot = process.env.VUE_APP_odpt_token;
-            pAll.push(loadjson(`places/odpt:BusstopPole?lat=${this.here.lat}&lon=${this.here.lng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
-            this.nearStops = await Promise.all(pAll)
+            pAll.push(loadjson(`places/odpt:BusstopPole?lat=${nlat}&lon=${nlng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
+            return await Promise.all(pAll)
             .catch(e=>{
                 console.log(e);
             })
@@ -299,6 +308,7 @@ export default {
             // 停留所の系統情報
             linesData:[],
             // 
+            nearStops:[]
         }
     }
 }
