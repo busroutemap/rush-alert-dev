@@ -27,7 +27,7 @@ export default {
             //---------------------------------------------
             // (a)
             this.pinStop = this.getThePoiData(this.poiSameAs);
-            const tmp = this.getTimeTablePoiAndTrip(this.poiSameAs,this.allRoutesSameAs)
+            this.allTimeTables = this.getTimeTablePoiAndTrip(this.poiSameAs,this.allRoutesSameAs)
             // (c)※速度遅いがpromise allを別で行う
             this.nearStops = this.getNearStops(userLocationData.lat,userLocationData.lng);
             // (d)
@@ -88,8 +88,6 @@ export default {
              */
             const _success = (position)=>{
                 const c = position.coords;
-                // 後々変えないといけない
-                // splice(開始位置、取り除く要素数、追加する要素内容)
                 this.userLocationData.lat = c.latitude;
                 this.userLocationData.lng = c.longitude;
                 this.userLocationData.ac = c.accuracy;
@@ -289,7 +287,7 @@ export default {
          * 行き先・時刻や、遅延情報など
          */
         getRealTimeTripData(){
-
+            // え、次便ってどう判定するの？？？？？？
         }
     },
     data(){
@@ -307,8 +305,11 @@ export default {
             },
             // 停留所の系統情報
             linesData:[],
-            // 
-            nearStops:[]
+            // 周辺停留所情報
+            nearStops:[],
+            // 系統ごとの停留所・便時刻データ集(膨大)
+            // データ構造は再検討した方が好ましい
+            allTimeTables:[]
         }
     }
 }
