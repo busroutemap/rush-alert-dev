@@ -4,6 +4,8 @@
         <UserCard/>
         <!-- 前の便、次の便、おすすめ便ボタンを追加する -->
         <BusCard/>
+        <PetitMap/>
+        <LineList/>
     </div>
 </template>
 <script>
@@ -160,9 +162,9 @@ export default {
         /**
          * getTimeTablePoiAndTrip : (b)選択停留所と選択系統の停留所&便時刻表を取得する
          * 複雑になるので、これは別で今回作成
-         * @param poiSameAs {String}
-         * @param routeSameAsArray {Array}
-         * @return result {Array} 選択系統ごとの配列、[poiTimeTable(Array),tripTimeTable(Array)]がそれぞれ含まれる
+         * @param {String} poiSameAs
+         * @param {Array} routeSameAsArray
+         * @return {Array} 選択系統ごとの配列、[poiTimeTable(Array),tripTimeTable(Array)]がそれぞれ含まれる
          */
         async getTimeTablePoiAndTrip(poiSameAs,routeSameAsArray){
             // カレンダー別名(odpt:Calendarのowl:sameAs)
@@ -254,7 +256,7 @@ export default {
          * getRoutesData : (d)その他系統情報
          * 停留所に関わる一般的な情報を取得する
          * 基本は(a)の戻り値を引数に取る？またはVueのdataから？
-         * @param routeSameAsArray {Array} 取得したい系統の別名配列。
+         * @param {Array} routeSameAsArray 取得したい系統の別名配列。
          * @return {Array} BusroutePattern配列。通常はこの関数の戻り値をthis.linesDataに代入する。
          * 失敗した場合、何もない配列を返す
          */
@@ -303,6 +305,22 @@ export default {
          */
         getRealTimeTripData(){
             // え、次便ってどう判定するの？？？？？？
+            // 曜日はひとまず、以下のように判定
+            //---------------------------------------------
+            // 今日の曜日数字(0-6で0が日曜日)
+            const day = new Date().getDay();
+            //---------------------------------------------
+            // 運行情報がある便は、既に通過しているかどうかで判定
+            // 運行情報がない便は、時刻から判定
+            // おすすめ便は、現在時刻＋利用者の到着予想を判定
+            // 利用者の歩行速度予想に上限を設ける
+            // その上でバス到着予想を行い、間に合う便をひとまず選択？
+            // バス到着予想はひとまず、ダイヤ上から予測する
+            // できれば過去の実績を保存したり、ダイヤから客観的に分析できるとなおよし
+        },
+        getNextTrip(routeSameAsArray){
+            const rsaa = routeSameAsArray;
+
         }
     },
     data(){
