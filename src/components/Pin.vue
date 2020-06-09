@@ -80,7 +80,7 @@ export default {
          */
         allRoutesSameAs(){
             return this.pinStop["odpt:busroutePattern"];
-        }
+        },
     },
     watch:{
         // 利用者のロケーション情報が変わったら、平均も変わる
@@ -309,6 +309,11 @@ export default {
             //---------------------------------------------
             // 今日の曜日数字(0-6で0が日曜日)
             const day = new Date().getDay();
+            if(this.isHoliday(day)){
+                // 土休日ダイヤの動作
+            } else{
+                // 平日ダイヤの動作
+            }
             //---------------------------------------------
             // 運行情報がある便は、既に通過しているかどうかで判定
             // 運行情報がない便は、時刻から判定
@@ -321,7 +326,17 @@ export default {
         getNextTrip(routeSameAsArray){
             const rsaa = routeSameAsArray;
 
-        }
+        },
+        /**
+         * isHoliday
+         * @summary isHoliday(new Date().getDay())で今日が土休日かどうか返す
+         * @description 将来的にはAPIでダイヤ判定を細かく行う
+         * @param {Number} dayNum 0-6までの、曜日を示す番号。0は日曜日、6は土曜日
+         */
+        isHoliday(dayNum){
+            const holiday = [0,6];
+            return holiday.includes(day);
+        },
     },
     data(){
         return{
