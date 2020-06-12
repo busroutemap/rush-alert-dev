@@ -127,7 +127,7 @@ export default {
         },
         /**
          * getThePoiData : (a)該当停留所情報
-         * @param thePoiSameAs {String} 情報が欲しい停留所のsameAs
+         * @param {String} thePoiSameAs  情報が欲しい停留所のsameAs
          * @return {Object} 該当停留所の情報
          */
         async getThePoiData(thePoiSameAs){
@@ -323,9 +323,15 @@ export default {
             // バス到着予想はひとまず、ダイヤ上から予測する
             // できれば過去の実績を保存したり、ダイヤから客観的に分析できるとなおよし
         },
+        
         getNextTrip(routeSameAsArray){
             const rsaa = routeSameAsArray;
-
+            const day = new Date().getDay();
+            if(this.isHoliday(day)){
+                // 土休日ダイヤの動作
+            } else{
+                // 平日ダイヤの動作
+            }
         },
         /**
          * isHoliday
