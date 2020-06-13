@@ -56,8 +56,7 @@ export default {
          * poiSameAs : バス停の別名。URLで1つ指定。
          */
         poiSameAs(){
-            const sameAs = new String(this.$route.params.poiSameAs);
-            return sameAs;
+            return this.$route.params.poiSameAs;
         },
         /**
          * pinRoutesSameAs : クエリで受け取った選択系統別名配列
