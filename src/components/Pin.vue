@@ -28,7 +28,7 @@ export default {
         LineList
     },
     mounted:function(){
-        this.$nextTick(()=>{
+        this.$nextTick(async()=>{
             // 描画されたら次のことを行う
             // (a)該当停留所情報の取得
             //  ↓
@@ -43,8 +43,8 @@ export default {
             //    何停留所前か、
             //---------------------------------------------
             // (a)
-            this.pinStop = this.getThePoiData(this.poiSameAs);
-            this.allTimeTables = this.getTimeTablePoiAndTrip(this.poiSameAs,this.allRoutesSameAs)
+            this.pinStop = (await this.getThePoiData(this.poiSameAs))[0];
+            this.allTimeTables = await this.getTimeTablePoiAndTrip(this.poiSameAs,this.allRoutesSameAs)
             // (c)※速度遅いがpromise allを別で行う
             this.nearStops = this.getNearStops(userLocationData.lat,userLocationData.lng);
             // (d)
@@ -129,7 +129,7 @@ export default {
          * @param {String} thePoiSameAs  情報が欲しい停留所のsameAs
          * @return {Object} 該当停留所の情報
          */
-        async getThePoiData(thePoiSameAs){
+        getThePoiData(thePoiSameAs){
             const loadjson = (addURL)=>{
                 const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
                 return fetch(baseURL+addURL)
@@ -145,18 +145,17 @@ export default {
                     console.log(e.message);
                 });
             };
-            let pAll = [];
             // 該当停留所を探す
             const vaot = process.env.VUE_APP_odpt_token;
-            pAll.push(loadjson(`odpt:BusstopPole?owl:sameAs=${thePoiSameAs}&acl:consumerKey=${vaot}`));
-            return await Promise.all(pAll)
-            .catch(e=>{
-                console.log(e);
-                return {};
-            })
-            .then(r=>{
-                return r[0];
-            });
+            const wishList = [
+                `odpt:BusstopPole?owl:sameAs=${thePoiSameAs}&acl:consumerKey=${vaot}`
+            ];
+            // const getData = async (urls)=>{
+            //     return Promise.all(urls.map(addURL=>{
+            //         return loadjson(addURL);
+            //     }));
+            // }
+            return loadjson(wishList[0]);
         },
         /**
          * getTimeTablePoiAndTrip : (b)選択停留所と選択系統の停留所&便時刻表を取得する
@@ -165,7 +164,7 @@ export default {
          * @param {Array} routeSameAsArray
          * @return {Array} 選択系統ごとの配列、[poiTimeTable(Array),tripTimeTable(Array)]がそれぞれ含まれる
          */
-        async getTimeTablePoiAndTrip(poiSameAs,routeSameAsArray){
+        getTimeTablePoiAndTrip(poiSameAs,routeSameAsArray){
             // カレンダー別名(odpt:Calendarのowl:sameAs)
             // 路線別名
             // 方面別名
@@ -186,25 +185,22 @@ export default {
                     console.log(e.message);
                 });
             };
+            const getData = async (urls)=>{
+                return Promise.all(urls.map(addURL=>{
+                    return loadjson(addURL);
+                }));
+            }
             //---------------------------------------------
             let pAll = [];
             // ひとまずエリア内のバス停を探す
             const vaot = process.env.VUE_APP_odpt_token;
             const rsaa = routeSameAsArray;
-            rsaa.forEach(value=>{
-                // 各選択系統ごとに、該当停留所の時刻表と、系統の時刻表を取得する
-                pAll.push([
-                    loadjson(`odpt:BusstopPoleTimetable?odpt:busstopPole=${poiSameAs}&odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`),
-                    loadjson(`odpt:BusTimeTable?odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`)
-                ]);
-            })
-            return await Promise.all(pAll)
-            .catch(e=>{
-                console.log(e);
-            })
-            .then(r=>{
-                return r;
-            });
+            console.log("rsaa"+rsaa);
+            const wishList = [
+                `odpt:BusstopPoleTimetable?odpt:busstopPole=${poiSameAs}&odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`,
+                `odpt:BusTimeTable?odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`
+            ];
+            return getData(wishList);
             //---------------------------------------------
         },
         /**
