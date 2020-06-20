@@ -1,7 +1,7 @@
 <template functional>
     <div>
         <div
-        v-for="(route,index)in routesInfo"
+        v-for="(route,index) in routesInfo"
         :key="route['@id']"
         :i="index"
         >
