@@ -5,7 +5,9 @@
             <div
             v-show="this.selectStops.length>0"
             >
-                <p>{{this.selectStops[0]}}まで{{this.selectDistance[0]}}m</p>
+                <p
+                v-if="this.pinData instanceof Object && this.pinData.hasOwnProperty('dc:title')"
+                >{{this.pinData['dc:title']}}まで{{this.selectDistance[0]}}m</p>
             </div>
             <!-- 一時的に選択バス停の0番目で対応 -->
             <!-- 将来的には複数バス停を？それとも単体？要検討 -->
@@ -79,6 +81,9 @@ export default {
                     }
                 }
             })
+        },
+        pinData(){
+            return this.selectStops[0]
         }
     },
     methods:{
