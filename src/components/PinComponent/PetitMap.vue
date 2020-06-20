@@ -22,17 +22,24 @@ L.Icon.Default.mergeOptions({
 export default {
     name:"PetitMap",
     props:{
-        
-    },
-    components:{
-
+        poiLatLng:{
+            type:Array,
+            default:()=>{
+                return [35.55,139.8]
+            }
+        }
     },
     mounted(){
-        let map = L.map('map').setView([43.067, 141.35], 16);
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        let map = L.map('map').setView(this.center, 16);
+        L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+            attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
             maxZoom: 18
         }).addTo(map);
+    },
+    data(){
+        return{
+            center:[35.678367, 139.763465]
+        }
     }
 }
 </script>
