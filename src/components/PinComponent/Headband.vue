@@ -23,25 +23,27 @@
 </script>
 <template functional>
     <div>
-        <h1>{{stopName}}</h1>
-        <h2>{{stopSubName}}</h2>
-        <span>[系統をここに一覧表示](未実装)</span>
-        <p class="bold">現在時刻 : {{time}}</p>
-        <div
-        v-for="(route, index) in routesInfo"
-        :key="route['@id']"
-        :i="index"
-        :routeName="route['dc:title']"
-        :routeDirection="route['odpt:direction']"
-        :routeNote="route['odpt:note']"
-        >
-            <h3>{{routeName}}</h3>
-            <p
-            v-for="operator in route['odpt:operator']"
-            :key="operator"
-            ><span>{{operator}}</span></p>
-            <p>{{routeDirection}}</p>
-            <p>{{routeNote}}</p>
+        <div class="cent">
+            <h1>{{props.stopName}}</h1>
+            <h2>{{props.stopSubName}}</h2>
+            <span>[系統をここに一覧表示](未実装)</span>
+            <p class="bold">現在時刻 : {{props.time}}</p>
+            <div
+            v-for="(route, index) in routesInfo"
+            :key="route['@id']"
+            :i="index"
+            :routeName="route['dc:title']"
+            :routeDirection="route['odpt:direction']"
+            :routeNote="route['odpt:note']"
+            >
+                <h3>{{routeName}}</h3>
+                <p
+                v-for="operator in route['odpt:operator']"
+                :key="operator"
+                ><span>{{operator}}</span></p>
+                <p>{{routeDirection}}</p>
+                <p>{{routeNote}}</p>
+            </div>
         </div>
     </div>
 </template>
@@ -51,20 +53,24 @@ export default {
     name:"HeadBand",
     props:{
         stopName:{
-            type:String
+            type:String,
+            default:"停留所名"
         },
         stopSubName:{
-            type:String
+            type:String,
+            default:"停留所副名称"
         },
         routesInfo:{
             type:Array
+        },
+        time:{
+            type:String
         }
     },
     computed:{
-        time(){
-            return new Date().getHours().toString()
-        },
-
+        // time(){
+        //     return new Date().getHours().toString()
+        // },
     },
 }
 </script>
@@ -72,5 +78,17 @@ export default {
 <style lang="scss" scoped>
 .bold{
     font-weight: bold;
+}
+.cent{
+    margin-top:10vh;
+    background-color:#1f87e2;
+    h1{
+        font-size: 5em;
+        border-bottom:solid white 5px;
+        background-color: #50FF50;
+    }
+    h2{
+        font-size:2em;
+    }
 }
 </style>

@@ -1,6 +1,10 @@
 <template>
     <div>
-        <Headband/>
+        <Headband
+        :stopName="this.pinStop['dc:title']"
+        :stopSubName="this.pinStop['dc:title']"
+        :time="this.now"
+        />
         <UserCard/>
         <!-- 前の便、次の便、おすすめ便ボタンを追加する -->
         <BusCard/>
@@ -28,6 +32,7 @@ export default {
         LineList
     },
     mounted:function(){
+        setInterval(this.checkTime(),3000);
         this.$nextTick(async()=>{
             // 描画されたら次のことを行う
             // (a)該当停留所情報の取得
@@ -88,7 +93,11 @@ export default {
         // userLocationData(oldValue,newValue){
         // }
     },
+
     methods:{
+        checkTime(){
+            this.now = new Date();
+        },
         /**
          * getLocation : (1)リアルタイム利用者情報
          */
@@ -341,6 +350,7 @@ export default {
     },
     data(){
         return{
+            now:new Date(),
             // 選択中の停留所情報
             pinStop:{},
             // 選択中の系統情報
