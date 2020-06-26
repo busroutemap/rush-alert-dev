@@ -95,7 +95,7 @@ export default {
                 path: `/pin/${sameAs}`,
                 query: {
                     here: '',
-                    pinRoute:'',
+                    pinRoutes:'',
                 }
             })
         }
