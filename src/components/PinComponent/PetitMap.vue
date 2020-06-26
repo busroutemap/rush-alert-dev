@@ -29,16 +29,23 @@ export default {
             }
         }
     },
+    watch:{
+        // 強引な方法
+        // 要修正
+        poiLatLng:function(value){
+            let map = L.map('map').setView(value, 16);
+            L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+                attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
+                maxZoom: 18
+            }).addTo(map);
+        }
+    },
     mounted(){
-        let map = L.map('map').setView(this.center, 16);
-        L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
-            attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
-            maxZoom: 18
-        }).addTo(map);
+
     },
     data(){
         return{
-            center:[35.678367, 139.763465]
+            // center:[35.678367, 139.763465]
         }
     }
 }
