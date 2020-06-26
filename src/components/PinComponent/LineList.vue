@@ -1,8 +1,8 @@
 <template functional>
     <div>
         <div
-        v-for="(route,index) in routesInfo"
-        :key="route['@id']"
+        v-for="(route,index) in props.routesInfo"
+        :key="index"
         :i="index"
         >
             <div
@@ -12,10 +12,12 @@
             </div>
             <ul>
                 <li>{{route['dc:title']}}</li>
-                <li
+                <li>
+                <span
                 v-for="operatorSameAs in route['odpt:operator']"
                 :key="operatorSameAs"
-                >{{operator(operatorSameAs)}}</li>
+                >{{operatorSameAs}}</span>
+                </li>
             </ul>
         </div>
     </div>
@@ -33,12 +35,6 @@ export default {
         }
     },
     computed:{
-        operator(sameAs){
-            const aimData = operators.find(obj=>{
-                returnobj["owl:sameAs"]===sameAs
-            })
-            return aimData["dc:title"];
-        }
     },
 }
 </script>

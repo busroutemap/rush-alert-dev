@@ -26,10 +26,13 @@
         <div class="cent">
             <h1>{{props.stopName}}</h1>
             <h2>{{props.stopSubName}}</h2>
-            <span>[系統をここに一覧表示](未実装)</span>
-            <p class="bold">現在時刻 : {{props.time}}</p>
+            <span
+            v-for="(route,index) in props.routesInfo"
+            :key="index"
+            >{{route['dc:title']}}</span>
+            <p class="bold">現在時刻 : (時刻未実装)</p>
             <div
-            v-for="(route, index) in routesInfo"
+            v-for="(route, index) in props.pinRoutesInfo"
             :key="route['@id']"
             :i="index"
             :routeName="route['dc:title']"
@@ -65,6 +68,9 @@ export default {
         },
         time:{
             type:String
+        },
+        pinRoutesInfo:{
+            type:Array
         }
     },
     computed:{
