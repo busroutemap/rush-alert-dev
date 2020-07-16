@@ -3,13 +3,19 @@
         <Headband
         :stopName="this.pinStop['dc:title']"
         :stopSubName="this.pinStop['dc:title']"
-        :time="this.now"
+        :routesInfo="this.linesData"
+        :pinRoutesInfo="this.pinRoutesData"
         />
         <UserCard/>
         <!-- 前の便、次の便、おすすめ便ボタンを追加する -->
         <BusCard/>
-        <PetitMap/>
-        <LineList/>
+        <PetitMap
+        :poiLatLng="this.pinLatLng"
+        />
+        <LineList
+        :operators="this.operators"
+        :routesInfo="this.linesData"
+        />
     </div>
 </template>
 <script>
@@ -51,9 +57,10 @@ export default {
             this.pinStop = (await this.getThePoiData(this.poiSameAs))[0];
             this.allTimeTables = await this.getTimeTablePoiAndTrip(this.poiSameAs,this.allRoutesSameAs)
             // (c)※速度遅いがpromise allを別で行う
-            this.nearStops = this.getNearStops(userLocationData.lat,userLocationData.lng);
+            this.nearStops = await this.getNearStops(this.pinLatLng[0],this.pinLatLng[1]);
+            console.log(this.nearStops);
             // (d)
-            this.linesData = this.getRoutesData(this.allRoutesSameAs);
+            this.linesData = (await this.getRoutesData(this.allRoutesSameAs))[0];
         })
     },
     computed:{
@@ -71,20 +78,45 @@ export default {
             if(Array.isArray(q)){
                 const sameAsArray = new Array(q);
                 return sameAsArray;
-            } else if (q!==""){
-                return [q];
             } else {
                 console.log("系統指定クエリが無効です");
-                const dummy = [];
-                return dummy;
+                const a = this.allRoutesSameAs;
+                console.log("指定系統:"+a);
+                return [a[0]];
             }
         },
         /**
          * allRoutesSameAs : 該当停留所の別名
          */
         allRoutesSameAs(){
-            return this.pinStop["odpt:busroutePattern"];
+            const bp = this.pinStop["odpt:busroutePattern"];
+            console.log("bp!")
+            console.log(bp)
+            return bp;
         },
+        pinLatLng(){
+            let lat = 35.55;
+            let lng = 139.8;
+            if(this.pinStop.hasOwnProperty("geo:lat")){
+                lat = this.pinStop["geo:lat"];
+                lng = this.pinStop["geo:long"];
+            }
+            return [lat,lng];
+        },
+        operators(){
+            let operators = [];
+            if(this.pinStop.hasOwnProperty("odpt:operator")){
+                operators = this.pinStop["odpt:operator"];
+            }
+            return operators;
+        },
+        pinRoutesData(){
+            const pins = this.pinRoutesSameAs;
+            const arr = this.linesData.filter(value=>{
+                return pins.includes(value["owl:sameAs"]);
+            });
+            return arr;
+        }
     },
     watch:{
         // 利用者のロケーション情報が変わったら、平均も変わる
@@ -159,11 +191,6 @@ export default {
             const wishList = [
                 `odpt:BusstopPole?owl:sameAs=${thePoiSameAs}&acl:consumerKey=${vaot}`
             ];
-            // const getData = async (urls)=>{
-            //     return Promise.all(urls.map(addURL=>{
-            //         return loadjson(addURL);
-            //     }));
-            // }
             return loadjson(wishList[0]);
         },
         /**
@@ -204,22 +231,29 @@ export default {
             // ひとまずエリア内のバス停を探す
             const vaot = process.env.VUE_APP_odpt_token;
             const rsaa = routeSameAsArray;
-            console.log("rsaa"+rsaa);
-            const wishList = [
+            const wishList = rsaa.map(value=>{
+                return [
                 `odpt:BusstopPoleTimetable?odpt:busstopPole=${poiSameAs}&odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`,
                 `odpt:BusTimeTable?odpt:busroutePattern=${value}&acl:consumerKey=${vaot}`
-            ];
-            return getData(wishList);
+                ]
+            });
+            const res = getData(wishList);
+            return res;
             //---------------------------------------------
         },
         /**
          * getNearStops : (c) 周辺停留所情報
-         * MapのNearStiosとは多少違う(引数や戻り値周辺)
+         * @description MapのNearStiosとは多少違う(引数や戻り値周辺)
          * @param {Number} lat
          * @param {Number} lng
          * @return {Array} nearStops
          */
         async getNearStops(lat,lng){
+            /**
+             * loadjson : opdtのAPIからjsonをfetchする
+             * @param {String} addURL 追加URL(v4/追加URLとfetchしてくる)
+             * @returns {Array} jsonデータの配列
+             */
             const loadjson = (addURL)=>{
                 const baseURL = "https://api-tokyochallenge.odpt.org/api/v4/";
                 return fetch(baseURL+addURL)
@@ -237,16 +271,19 @@ export default {
             };
             //---------------------------------------------
             let pAll = [];
+            let nlat;
+            let nlng;
             if(lat==null||lng==null){
-                const nlat = this.pinStop["geo:lat"];
-                const nlng = this.pinStop["geo:long"];
+                nlat = this.pinStop["geo:lat"];
+                nlng = this.pinStop["geo:long"];
             } else{
-                const nlat = lat;
-                const nlng = lng;
+                nlat = lat;
+                nlng = lng;
             }
             // ひとまずエリア内のバス停を探す
             const vaot = process.env.VUE_APP_odpt_token;
             pAll.push(loadjson(`places/odpt:BusstopPole?lat=${nlat}&lon=${nlng}&radius=${this.radius}&acl:consumerKey=${vaot}`));
+            console.log("getNearStops");
             return await Promise.all(pAll)
             .catch(e=>{
                 console.log(e);
@@ -258,7 +295,7 @@ export default {
         },
         /**
          * getRoutesData : (d)その他系統情報
-         * 停留所に関わる一般的な情報を取得する
+         * @summary 停留所に関わる一般的な情報を取得する
          * 基本は(a)の戻り値を引数に取る？またはVueのdataから？
          * @param {Array} routeSameAsArray 取得したい系統の別名配列。
          * @return {Array} BusroutePattern配列。通常はこの関数の戻り値をthis.linesDataに代入する。
@@ -281,21 +318,24 @@ export default {
                     console.log(e.message);
                 });
             };
+            const getData = async (urls)=>{
+                return Promise.all(urls.map(addURL=>{
+                    return loadjson(addURL);
+                }));
+            }
+            console.log("途中経過getRoutesData")
             if(Array.isArray(rsaa)&&rsaa!==[]){
                 let pAll = [];
                 // 系統データを取得する
                 const vaot = process.env.VUE_APP_odpt_token;
-                rsaa.forEach(e=>{
-                    pAll.push(loadjson(`odpt:BusroutePattern?owl:sameAs=${e}&acl:consumerKey=${vaot}`));
-                });
-                return await Promise.all(pAll)
-                .catch(e=>{
-                    console.log("NetWork API Error!");
-                    return [];
-                })
-                .then(r=>{
-                    return r;
-                });
+                // rsaa.forEach(e=>{
+                //     pAll.push(loadjson(`odpt:BusroutePattern?owl:sameAs=${e}&acl:consumerKey=${vaot}`));
+                // });
+                const p = [
+                    `odpt:BusroutePattern?owl:sameAs=${rsaa}&acl:consumerKey=${vaot}`
+                ]
+                console.log("getRoutesDataのpromise:"+p);
+                return getData(p);
             } else{
                 console.log("sameAsArray Error!");
                 return [];
@@ -354,7 +394,7 @@ export default {
             // 選択中の停留所情報
             pinStop:{},
             // 選択中の系統情報
-            pinLine:{},
+            // pinRoutesData:[],
             // 利用者の情報
             userLocationData:{
                 lat:null,
@@ -368,7 +408,8 @@ export default {
             nearStops:[],
             // 系統ごとの停留所・便時刻データ集(膨大)
             // データ構造は再検討した方が好ましい
-            allTimeTables:[]
+            allTimeTables:[],
+            radius:400
         }
     }
 }

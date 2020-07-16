@@ -26,27 +26,25 @@
         <div class="cent">
             <h1>{{props.stopName}}</h1>
             <h2>{{props.stopSubName}}</h2>
-            <span
+            <p
             v-for="(route,index) in props.routesInfo"
             :key="index"
-            >{{route['dc:title']}}</span>
+            >{{route['dc:title']}}</p>
             <p class="bold">現在時刻 : (時刻未実装)</p>
-            <div
+            <!-- <div
             v-for="(route, index) in props.pinRoutesInfo"
             :key="route['@id']"
             :i="index"
+            :route="route"
             :routeName="route['dc:title']"
             :routeDirection="route['odpt:direction']"
             :routeNote="route['odpt:note']"
             >
                 <h3>{{routeName}}</h3>
-                <p
-                v-for="operator in route['odpt:operator']"
-                :key="operator"
-                ><span>{{operator}}</span></p>
+                {{route['odpt:operator']}}
                 <p>{{routeDirection}}</p>
                 <p>{{routeNote}}</p>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
